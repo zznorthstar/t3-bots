@@ -24,6 +24,11 @@ export const Route = createFileRoute("/_chat/issues")({
     ...present("host", bounded(raw.host)),
     // Always an own key: the router lays this over the parent route's unvalidated search.
     q: bounded(raw.q),
+    ...(Array.isArray(raw.label) && raw.label.length > 0
+      ? { label: raw.label.flatMap((name) => bounded(name) ?? []).slice(0, 20) }
+      : {}),
+    ...present("assignee", bounded(raw.assignee)),
+    ...(raw.order === "created" ? { order: "created" as const } : {}),
     ...present<"selectedEnvironmentId", EnvironmentId>(
       "selectedEnvironmentId",
       bounded(raw.selectedEnvironmentId),

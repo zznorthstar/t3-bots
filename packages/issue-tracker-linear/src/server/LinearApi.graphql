@@ -93,8 +93,8 @@ query T3Viewer {
   }
 }
 
-query T3Issues($first: Int!, $after: String, $filter: IssueFilter!) {
-  issues(first: $first, after: $after, filter: $filter, orderBy: updatedAt) {
+query T3Issues($first: Int!, $after: String, $filter: IssueFilter!, $orderBy: PaginationOrderBy!) {
+  issues(first: $first, after: $after, filter: $filter, orderBy: $orderBy) {
     nodes {
       ...LinearIssue
     }

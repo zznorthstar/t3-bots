@@ -4,6 +4,8 @@ import type {
   IssueListEntry,
   IssueListProjectError,
   IssueListResult,
+  IssueListSort,
+  IssueScopeRef,
   IssueTrackerSummary,
   SourceControlProviderKind,
 } from "@t3tools/contracts";
@@ -70,10 +72,18 @@ export function continueIssuePage(
       };
 }
 
+/** Newest first by the date the trackers were asked to sort on, so merged rows keep that order. */
+export function issueOrder(sort: IssueListSort) {
+  const date = (issue: IssueListEntry) =>
+    Date.parse(sort === "created" ? issue.createdAt : issue.updatedAt);
+  return (left: IssueListEntry, right: IssueListEntry) => date(right) - date(left);
+}
+
 export function groupIssues(
   held: ReadonlyMap<EnvironmentId, HeldIssuePage>,
   query: string,
   projects: ReadonlyArray<EnvironmentProject>,
+  sort: IssueListSort = "updated",
 ) {
   const byTracker = new Map<
     string,
@@ -122,10 +132,42 @@ export function groupIssues(
       group?.errors.push({ ...error, environmentId });
     }
   }
-  for (const group of byTracker.values()) {
-    group.rows.sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt));
-  }
+  for (const group of byTracker.values()) group.rows.sort(issueOrder(sort));
   return [...byTracker.values()].sort((a, b) =>
     issueTrackerKey(a.tracker).localeCompare(issueTrackerKey(b.tracker)),
   );
+}
+
+/** The scopes whose labels and people a list filter offers, each reached through one project. */
+export function issueFilterScopes(
+  held: ReadonlyMap<EnvironmentId, HeldIssuePage>,
+  projects: ReadonlyArray<EnvironmentProject>,
+) {
+  const scopes: Array<{ readonly environmentId: EnvironmentId; readonly input: IssueScopeRef }> =
+    [];
+  for (const [environmentId, page] of held) {
+    for (const project of projects) {
+      if (project.environmentId !== environmentId) continue;
+      const identity = project.repositoryIdentity;
+      const kind = identity?.provider as SourceControlProviderKind | undefined;
+      const scope = sourceControlClients.issueScope(identity);
+      if (!identity || !kind || scope === null) continue;
+      const host = sourceControlClients.changeRequestHost(identity, kind);
+      const tracker = page.answer.trackers.find(
+        (t) => String(t.tracker) === kind && t.host.toLowerCase() === host.toLowerCase(),
+      );
+      if (!tracker?.configured || tracker.capabilities === null) continue;
+      if (
+        scopes.some(
+          (s) => s.input.scope.toLowerCase() === scope.toLowerCase() && s.input.host === host,
+        )
+      )
+        continue;
+      scopes.push({
+        environmentId,
+        input: { projectId: project.id, tracker: tracker.tracker, host, scope },
+      });
+    }
+  }
+  return scopes;
 }

@@ -110,6 +110,7 @@ export class LinearApi extends Context.Service<
       readonly filter: IssueFilter;
       readonly first: number;
       readonly after?: string | undefined;
+      readonly orderBy: "updatedAt" | "createdAt";
     }) => Effect.Effect<
       { readonly nodes: ReadonlyArray<LinearIssue>; readonly nextCursor: string | null },
       IssueTrackerError
@@ -287,7 +288,12 @@ export const make = Effect.gen(function* () {
 
   const listIssues: LinearApi["Service"]["listIssues"] = (input) =>
     call("listIssues", (linear) =>
-      linear.T3Issues({ first: input.first, after: input.after ?? null, filter: input.filter }),
+      linear.T3Issues({
+        first: input.first,
+        after: input.after ?? null,
+        filter: input.filter,
+        orderBy: input.orderBy,
+      }),
     ).pipe(
       Effect.map((data) => ({
         nodes: data.issues.nodes,

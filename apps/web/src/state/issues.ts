@@ -1,6 +1,8 @@
 import {
   createIssueEnvironmentAtoms,
+  createMergedIssueCandidatesAtoms,
   createMergedIssueListAtoms,
+  type IssueCandidatesTarget,
   type IssueListTarget,
   type MergedIssueList,
 } from "@t3tools/client-runtime/state/issues";
@@ -25,4 +27,14 @@ export function useIssueList(
 ): MergedIssueList & { readonly refresh: () => void } {
   const view = useAtomValue(mergedIssueLists.atom(targets));
   return { ...view, refresh: () => mergedIssueLists.refresh(appAtomRegistry, targets) };
+}
+
+const mergedIssueCandidates = createMergedIssueCandidatesAtoms(
+  issueEnvironment.candidates,
+  formatEnvironmentQueryError,
+);
+
+/** The labels and people of every scope a list filter covers; no targets reads nothing. */
+export function useIssueFilterCandidates(targets: ReadonlyArray<IssueCandidatesTarget>) {
+  return useAtomValue(mergedIssueCandidates(targets));
 }

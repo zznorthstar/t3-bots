@@ -405,6 +405,10 @@ export const make: Effect.Effect<StandaloneIssueTrackerApi, never, LinearApi.Lin
                       : { nin: CLOSED_STATE_TYPES },
                 },
               }),
+          ...(input.assignee === undefined ? {} : { assignee: { id: { eq: input.assignee } } }),
+          ...(input.labels === undefined || input.labels.length === 0
+            ? {}
+            : { and: input.labels.map((name) => ({ labels: { some: { name: { eq: name } } } })) }),
           ...(input.query === undefined
             ? {}
             : {
@@ -415,12 +419,19 @@ export const make: Effect.Effect<StandaloneIssueTrackerApi, never, LinearApi.Lin
                 ],
               }),
         };
-        return linear.listIssues({ filter, first: input.limit, after: input.cursor }).pipe(
-          Effect.map((page) => ({
-            items: page.nodes.map(toSummary),
-            nextCursor: page.nextCursor,
-          })),
-        );
+        return linear
+          .listIssues({
+            filter,
+            first: input.limit,
+            after: input.cursor,
+            orderBy: input.sort === "created" ? "createdAt" : "updatedAt",
+          })
+          .pipe(
+            Effect.map((page) => ({
+              items: page.nodes.map(toSummary),
+              nextCursor: page.nextCursor,
+            })),
+          );
       },
 
       getIssue: Effect.fn("LinearIssueTracker.getIssue")(function* (input) {

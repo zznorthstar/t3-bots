@@ -193,11 +193,28 @@ describe("GitLabIssueTracker", () => {
         state: "open",
         involvement: "assigned",
         viewer: "julius",
+        sort: "updated",
         limit: 1,
         cursor: "3",
       });
       expect(paths[0]).toBe(
         "projects/acme%2Fweb/issues?state=opened&assignee_username=julius&order_by=updated_at&sort=desc&per_page=1&page=3",
+      );
+      // A named assignee takes the place of "assigned to me" in the one parameter GitLab reads.
+      yield* api.listIssues({
+        cwd: "/w",
+        host: "gitlab.com",
+        scope: "acme/web",
+        state: "open",
+        involvement: "assigned",
+        viewer: "julius",
+        labels: ["bug", "needs triage"],
+        assignee: "theo",
+        sort: "created",
+        limit: 1,
+      });
+      expect(paths[1]).toBe(
+        "projects/acme%2Fweb/issues?state=opened&labels=bug%2Cneeds%20triage&assignee_username=theo&order_by=created_at&sort=desc&per_page=1&page=1",
       );
       expect(page.items[0]?.key).toBe("42");
       expect(page.nextCursor).toBe("4");

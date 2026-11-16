@@ -103,12 +103,14 @@ function query(params: ReadonlyArray<readonly [string, string]>): string {
 function involvementParams(input: {
   readonly involvement: IssueInvolvement;
   readonly viewer: string;
+  readonly assignee?: string | undefined;
 }): ReadonlyArray<readonly [string, string]> {
   switch (input.involvement) {
     case "authored":
       return [["author_username", input.viewer]];
     case "assigned":
-      return [["assignee_username", input.viewer]];
+      // A named assignee already takes the one assignee parameter GitLab reads.
+      return input.assignee === undefined ? [["assignee_username", input.viewer]] : [];
     // GitLab's `my_reaction_emoji` and `iteration` filters aside, nothing narrows to mentions, so
     // the listing stays as wide as `all` rather than guessing.
     case "mentioned":
@@ -344,7 +346,13 @@ export const make: Effect.Effect<IssueTrackerApi, never, GitLabCli.GitLabCli> = 
             // GitLab's own `search` matches title and description, URL-encoded like every other
             // value here, so no text in it can become a parameter of its own.
             ...(text.length === 0 ? [] : [["search", text] as const]),
-            ["order_by", "updated_at"],
+            ...(input.labels === undefined || input.labels.length === 0
+              ? []
+              : [["labels", input.labels.join(",")] as const]),
+            ...(input.assignee === undefined
+              ? []
+              : [["assignee_username", input.assignee] as const]),
+            ["order_by", input.sort === "created" ? "created_at" : "updated_at"],
             ["sort", "desc"],
             ["per_page", String(perPage)],
             ["page", String(page)],

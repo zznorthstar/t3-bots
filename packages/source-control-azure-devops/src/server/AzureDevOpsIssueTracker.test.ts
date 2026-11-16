@@ -220,10 +220,20 @@ describe("AzureDevOpsIssueTracker", () => {
         state: "open",
         involvement: "all",
         viewer: "octo@acme.test",
+        labels: ["o'hare"],
+        assignee: "theo@acme.test",
+        sort: "created",
         limit: 10,
+        cursor: "2026-07-01T00:00:00Z|7",
       });
       expect(bodies).toHaveLength(1);
       expect(bodies[0]).toContain("AND [System.State] NOT IN ('shipped')");
+      const { query } = JSON.parse(bodies[0]!) as { query: string };
+      expect(query).toContain(
+        " AND [System.Tags] CONTAINS 'o''hare' AND [System.AssignedTo] = 'theo@acme.test'" +
+          " AND ([System.CreatedDate] < '2026-07-01T00:00:00Z' OR ([System.CreatedDate] = '2026-07-01T00:00:00Z' AND [System.Id] < 7))" +
+          " ORDER BY [System.CreatedDate] DESC, [System.Id] DESC",
+      );
     }).pipe(Effect.provide(NodeFileSystem.layer)),
   );
 

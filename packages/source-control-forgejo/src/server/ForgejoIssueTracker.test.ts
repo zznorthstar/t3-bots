@@ -207,11 +207,27 @@ describe("ForgejoIssueTracker", () => {
         state: "open",
         involvement: "authored",
         viewer: "julius",
+        sort: "updated",
         limit: 50,
         cursor: "2",
       });
+      // Forgejo matches any of the labels it is sent, so a row missing one is dropped here.
+      const filtered = yield* api.listIssues({
+        cwd: "/w",
+        host: "forgejo.test:3000",
+        scope: "acme/web",
+        state: "open",
+        involvement: "all",
+        viewer: "julius",
+        labels: ["bug", "p1"],
+        assignee: "theo",
+        sort: "created",
+        limit: 50,
+      });
+      expect(filtered.items).toEqual([]);
       expect(paths).toEqual([
         "repos/acme/web/issues?type=issues&state=open&sort=recentupdate&created_by=julius&limit=50&page=2",
+        "repos/acme/web/issues?type=issues&state=open&sort=latest&labels=bug%2Cp1&assigned_by=theo&limit=50&page=1",
       ]);
       expect(page.items.map((item) => item.key)).toEqual(["42"]);
       // No `Link` header at all means the server may still have more; a full page carries on.

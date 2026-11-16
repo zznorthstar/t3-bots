@@ -120,8 +120,10 @@ describe("LinearIssueTracker", () => {
           expect(variables.filter).toMatchObject({
             team: { key: { eq: "ENG" } },
             state: { type: { nin: ["completed", "canceled"] } },
-            assignee: { id: { eq: "usr_julius" } },
+            assignee: { id: { eq: "usr_theo" } },
+            and: [{ labels: { some: { name: { eq: "Bug" } } } }],
           });
+          expect(variables.orderBy).toBe("createdAt");
           return {
             issues: {
               nodes: [
@@ -145,6 +147,9 @@ describe("LinearIssueTracker", () => {
         state: "open",
         involvement: "assigned",
         viewer: "usr_julius",
+        labels: ["Bug"],
+        assignee: "usr_theo",
+        sort: "created",
         limit: 50,
       });
       expect(page.nextCursor).toBe("cur_2");

@@ -3,6 +3,7 @@ import {
   continueIssuePage,
   groupIssues,
   holdIssuePages,
+  issueFilterScopes,
   issueTrackerKey,
   type HeldIssuePage,
 } from "@t3tools/client-runtime/issue-list";
@@ -11,6 +12,7 @@ import type {
   EnvironmentId,
   IssueInvolvement,
   IssueListInput,
+  IssueListSort,
   IssueListState,
   IssueTrackerKind,
   IssueTrackerSummary,
@@ -18,8 +20,11 @@ import type {
 } from "@t3tools/contracts";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import {
+  ArrowDownUpIcon,
   AtSignIcon,
+  CalendarArrowDownIcon,
   CircleCheckIcon,
+  ClockIcon,
   LayersIcon,
   PenLineIcon,
   Plug2Icon,
@@ -44,6 +49,8 @@ import {
   PullRequestSearchInput,
   type PullRequestFilterOption,
 } from "~/components/pullRequest/PullRequestListFilters";
+import { IssueFiltersMenu } from "./IssueListFilterPickers";
+import { PullRequestCompactFilterMenu } from "../pullRequest/PullRequestCompactFilterMenu";
 import { PullRequestsUnavailableState } from "~/components/pullRequest/PullRequestsUnavailableState";
 import { RightPanelTabs } from "~/components/RightPanelTabs";
 import { WorkspaceBreadcrumb, WorkspaceBreadcrumbItem } from "~/components/WorkspaceBreadcrumb";
@@ -60,7 +67,6 @@ import {
 } from "~/components/ui/empty";
 import { Menu, MenuPopup, MenuRadioGroup, MenuRadioItem, MenuTrigger } from "~/components/ui/menu";
 import { SidebarInset } from "~/components/ui/sidebar";
-import { Toggle, ToggleGroup } from "~/components/ui/toggle-group";
 import { isElectron } from "~/env";
 import { useLiveRefresh } from "~/hooks/useLiveRefresh";
 import { shortcutLabelForCommand } from "~/keybindings";
@@ -105,6 +111,11 @@ const INVOLVEMENT_TABS = [
   { value: "authored", label: "Opened by me", Icon: PenLineIcon },
   { value: "mentioned", label: "Mentioning me", Icon: AtSignIcon },
 ] as const satisfies ReadonlyArray<PullRequestFilterOption<IssueInvolvement>>;
+
+const SORT_OPTIONS = [
+  { value: "updated", label: "Recently updated", Icon: ClockIcon },
+  { value: "created", label: "Newest", Icon: CalendarArrowDownIcon },
+] as const satisfies ReadonlyArray<PullRequestFilterOption<IssueListSort>>;
 
 const PAGE_SIZE = 50;
 const EMPTY_SET: ReadonlySet<string> = new Set();
@@ -160,6 +171,9 @@ export function IssuesPage() {
     limit: PAGE_SIZE,
     ...(search.host ? { host: search.host } : {}),
     ...(debouncedQuery ? { query: debouncedQuery } : {}),
+    ...(search.label?.length ? { labels: search.label } : {}),
+    ...(search.assignee ? { assignee: search.assignee } : {}),
+    ...(search.order ? { sort: search.order } : {}),
   };
   const targets: ReadonlyArray<IssueListTarget> = capableEnvironments.map((e) => ({
     environmentId: e.environmentId,
@@ -199,7 +213,8 @@ export function IssuesPage() {
 
   // Rows grouped per tracker account, so a tracker that cannot be read says so where its rows
   // would be, and each tracker's rows carry on from their own cursors.
-  const groups = groupIssues(held, debouncedQuery, projects);
+  const groups = groupIssues(held, debouncedQuery, projects, search.order ?? "updated");
+  const filterScopes = issueFilterScopes(held, projects);
 
   const hostOptions = hostOptionsFor(groups);
 
@@ -210,6 +225,9 @@ export function IssuesPage() {
       status: merged.status ?? search.status,
       ...(merged.host ? { host: merged.host } : {}),
       q: merged.q || undefined,
+      ...(merged.label?.length ? { label: merged.label } : {}),
+      ...(merged.assignee ? { assignee: merged.assignee } : {}),
+      ...(merged.order ? { order: merged.order } : {}),
       ...(merged.selectedEnvironmentId
         ? { selectedEnvironmentId: merged.selectedEnvironmentId }
         : {}),
@@ -510,7 +528,7 @@ export function IssuesPage() {
           <div className="topbar-scroll-fade scrollbar-gutter-both min-h-0 flex-1 overflow-y-auto">
             <WorkspacePageContainer width="expanded" className="min-h-full gap-4">
               <div className="flex flex-wrap items-center gap-2">
-                <div className="min-w-0 basis-full @lg/issue-list:basis-0 @lg/issue-list:flex-1">
+                <div className="min-w-0 basis-full @lg/issue-list:min-w-48 @lg/issue-list:basis-0 @lg/issue-list:flex-1">
                   <PullRequestSearchInput
                     value={search.q ?? ""}
                     label="Search issues"
@@ -523,27 +541,29 @@ export function IssuesPage() {
                     onSubmit={(q) => updateSearch({ q: q || undefined })}
                   />
                 </div>
-                <ToggleGroup
-                  size="segmented"
-                  variant="segmented"
-                  aria-label="Filter by state"
-                  value={[search.status]}
-                  onValueChange={(next) => {
-                    const status = STATE_TABS.find((tab) => tab.value === next[0])?.value;
-                    if (status) updateSearch({ status });
-                  }}
-                >
-                  {STATE_TABS.map((tab) => (
-                    <Toggle key={tab.value} value={tab.value}>
-                      {tab.label}
-                    </Toggle>
-                  ))}
-                </ToggleGroup>
-                <FilterMenu
-                  label="Filter by involvement"
-                  value={search.who}
-                  options={INVOLVEMENT_TABS}
-                  onChange={(who) => updateSearch({ who })}
+                <PullRequestCompactFilterMenu
+                  label="Sort issues"
+                  triggerIcon={<ArrowDownUpIcon aria-hidden className="size-4" />}
+                  triggerLabel="Sort"
+                  outlined
+                  value={search.order ?? "updated"}
+                  options={SORT_OPTIONS}
+                  onChange={(order) =>
+                    updateSearch({ order: order === "created" ? "created" : undefined })
+                  }
+                />
+                <IssueFiltersMenu
+                  state={search.status}
+                  stateOptions={STATE_TABS}
+                  onState={(status) => updateSearch({ status })}
+                  involvement={search.who}
+                  involvementOptions={INVOLVEMENT_TABS}
+                  onInvolvement={(who) => updateSearch({ who })}
+                  scopes={filterScopes}
+                  labels={search.label ?? []}
+                  onLabels={(label) => updateSearch({ label })}
+                  assignee={search.assignee}
+                  onAssignee={(assignee) => updateSearch({ assignee })}
                 />
                 {hostOptions.length > 1 ? (
                   <FilterMenu

@@ -188,10 +188,10 @@ function stateClause(state: "all" | "open" | "closed", closedStates: ClosedState
   }
 }
 
-/** `<iso changed date>|<id>` of the last row handed over, which is where the next page starts. */
-function parseCursor(cursor: string): { readonly changedAt: string; readonly id: number } | null {
+/** `<iso date the list is sorted by>|<id>` of the last row handed over, where the next page starts. */
+function parseCursor(cursor: string): { readonly date: string; readonly id: number } | null {
   const match = /^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z)\|([1-9]\d{0,9})$/.exec(cursor);
-  return match === null ? null : { changedAt: match[1]!, id: Number(match[2]) };
+  return match === null ? null : { date: match[1]!, id: Number(match[2]) };
 }
 
 function reasonFor(error: AzureDevOpsCli.AzureDevOpsCliError): IssueTrackerError["reason"] {
@@ -555,16 +555,16 @@ export const make: Effect.Effect<
         ),
       ),
 
-    listIssues: (input) => {
+    listIssues: Effect.fn("AzureDevOpsIssueTracker.listIssues")(function* (input) {
       const cursor = input.cursor === undefined ? undefined : parseCursor(input.cursor);
       if (cursor === null) {
-        return Effect.fail(
-          refused("listIssues", "The cursor was not one Azure DevOps handed out."),
-        );
+        return yield* refused("listIssues", "The cursor was not one Azure DevOps handed out.");
       }
       const limit = Math.min(Math.max(input.limit, 1), PAGE_SIZE);
       const text = input.query?.trim() ?? "";
-      return scoped("listIssues", input).pipe(
+      const created = input.sort === "created";
+      const dateField = created ? "[System.CreatedDate]" : "[System.ChangedDate]";
+      return yield* scoped("listIssues", input).pipe(
         Effect.flatMap((scope) =>
           closedStates({ ...scope, cwd: input.cwd, operation: "listIssues" }).pipe(
             Effect.map((closed) => ({ scope, closed })),
@@ -587,10 +587,16 @@ export const make: Effect.Effect<
                 stateClause(input.state, closed) +
                 involvementClause(input.involvement) +
                 (text.length === 0 ? "" : ` AND [System.Title] CONTAINS ${quoted(text)}`) +
+                (input.labels ?? [])
+                  .map((label) => ` AND [System.Tags] CONTAINS ${quoted(label)}`)
+                  .join("") +
+                (input.assignee === undefined
+                  ? ""
+                  : ` AND [System.AssignedTo] = ${quoted(input.assignee)}`) +
                 (cursor === undefined
                   ? ""
-                  : ` AND ([System.ChangedDate] < ${quoted(cursor.changedAt)} OR ([System.ChangedDate] = ${quoted(cursor.changedAt)} AND [System.Id] < ${cursor.id}))`) +
-                " ORDER BY [System.ChangedDate] DESC, [System.Id] DESC",
+                  : ` AND (${dateField} < ${quoted(cursor.date)} OR (${dateField} = ${quoted(cursor.date)} AND [System.Id] < ${cursor.id}))`) +
+                ` ORDER BY ${dateField} DESC, [System.Id] DESC`,
             },
           }).pipe(
             Effect.flatMap((raw) => {
@@ -624,7 +630,7 @@ export const make: Effect.Effect<
                         items,
                         nextCursor:
                           ids.length > limit && last !== undefined
-                            ? `${last.updatedAt}|${last.key}`
+                            ? `${created ? last.createdAt : last.updatedAt}|${last.key}`
                             : null,
                       };
                     }),
@@ -633,7 +639,7 @@ export const make: Effect.Effect<
           ),
         ),
       );
-    },
+    }),
 
     getIssue: (input) =>
       target("getIssue", input).pipe(
