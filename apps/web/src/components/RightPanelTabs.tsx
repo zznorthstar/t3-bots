@@ -36,6 +36,7 @@ import { restrictToFirstScrollableAncestor, restrictToHorizontalAxis } from "@dn
 import { horizontalListSortingStrategy, SortableContext, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import {
+  BotIcon,
   Smartphone,
   ChevronDown,
   ChevronLeft,
@@ -143,6 +144,7 @@ export interface RightPanelTabsProps {
   onAddPullRequest: () => void;
   onAddPullRequests: () => void;
   onAddDevice: () => void;
+  onAddBot?: (() => void) | undefined;
   /** Absent where side chats are not offered. */
   onAddSideChat?: (() => void) | undefined;
   browserAvailable: boolean;
@@ -324,6 +326,7 @@ function RightPanelEmptyState(props: {
   onAddPullRequest: () => void;
   onAddPullRequests: () => void;
   onAddDevice: () => void;
+  onAddBot?: (() => void) | undefined;
   /** Absent where side chats are not offered. */
   onAddSideChat?: (() => void) | undefined;
   browserAvailable: boolean;
@@ -387,6 +390,18 @@ function RightPanelEmptyState(props: {
       disabledReason: SURFACE_UNAVAILABLE_HINTS.pullRequests,
       onClick: props.onAddPullRequests,
     },
+    ...(props.onAddBot
+      ? [
+          {
+            label: "Bot",
+            icon: BotIcon,
+            shortcut: "O",
+            available: true,
+            disabledReason: "Bot runtime unavailable.",
+            onClick: props.onAddBot,
+          },
+        ]
+      : []),
     {
       label: "Device",
       description: "Watch an iOS Simulator or Android Emulator.",
@@ -575,6 +590,8 @@ function surfaceTitle(
   terminalLabelsById: ReadonlyMap<string, string>,
 ): string {
   switch (surface.kind) {
+    case "bot":
+      return "Bot";
     case "diff":
       return "Diff";
     case "files":
@@ -659,6 +676,8 @@ function SurfaceIcon({
   switch (surface.kind) {
     case "preview":
       return <PreviewFavicon capturedUrl={previewCapturedUrl} url={previewUrl} />;
+    case "bot":
+      return <BotIcon className="size-3 shrink-0" />;
     case "diff":
       return <FileDiff className="size-3 shrink-0" />;
     case "files":
@@ -1141,6 +1160,18 @@ export function RightPanelTabs(props: RightPanelTabsProps) {
       disabledReason: SURFACE_DISABLED_REASONS.pullRequests,
       onClick: props.onAddPullRequests,
     },
+    ...(props.onAddBot
+      ? [
+          {
+            label: "Bot",
+            icon: BotIcon,
+            shortcut: "O",
+            available: true,
+            disabledReason: "Bot runtime unavailable.",
+            onClick: props.onAddBot,
+          },
+        ]
+      : []),
     {
       label: "Device",
       icon: Smartphone,
@@ -1545,6 +1576,7 @@ export function RightPanelTabs(props: RightPanelTabsProps) {
             onAddFiles={props.onAddFiles}
             onAddPullRequest={props.onAddPullRequest}
             onAddPullRequests={props.onAddPullRequests}
+            onAddBot={props.onAddBot}
             onAddDevice={props.onAddDevice}
             onAddSideChat={props.onAddSideChat}
             browserAvailable={props.browserAvailable}

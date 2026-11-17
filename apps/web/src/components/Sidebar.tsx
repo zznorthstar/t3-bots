@@ -1,3 +1,5 @@
+import { NewBotAction } from "./bots/NewBotDialog";
+import { BotSidebar } from "./bots/BotSidebar";
 import { attachSidebarTree } from "../lib/sidebarTree";
 import { type EnvironmentId, type ScopedProjectRef } from "@t3tools/contracts";
 import type { EnvironmentServerConfig } from "@t3tools/client-runtime/connection";
@@ -2970,6 +2972,7 @@ export default function Sidebar({ routeReveal }: { routeReveal: SidebarRouteReve
         fixedHeader={
           <SidebarGroup className="z-[1]">
             <SidebarThreadHeader
+              newBotAction={<NewBotAction />}
               hasProjects={projectGroups.length > 0}
               projectScope={
                 <Combobox
@@ -3199,6 +3202,7 @@ export default function Sidebar({ routeReveal }: { routeReveal: SidebarRouteReve
           </SidebarGroup>
         }
       >
+        <BotSidebar />
         <SidebarGroup className="flex-1" role="presentation">
           {isSearchingThreads ? (
             threadSearchResults.length > 0 ? (

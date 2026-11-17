@@ -1,3 +1,4 @@
+import { openNewBot } from "./bots/botCreation";
 import { ThreadContextDragGhost } from "./chat/ThreadContextDragGhost";
 import { threadPullRequestLinkMode } from "@t3tools/client-runtime/thread-pull-request-compatibility";
 import { visibleThreadPullRequests } from "@t3tools/shared/threadPullRequests";
@@ -66,6 +67,7 @@ import {
   FileSearchIcon,
   FolderGit2Icon,
   FolderIcon,
+  BotIcon,
   FolderPlusIcon,
   MessageSquareDashedIcon,
   LinkIcon,
@@ -1775,6 +1777,17 @@ function OpenCommandPaletteDialog(props: {
       },
     });
   }
+
+  actionItems.push({
+    kind: "action",
+    value: "action:new-bot",
+    title: "New bot",
+    searchTerms: ["bot", "assistant", "hermes"],
+    icon: <BotIcon className={ITEM_ICON_CLASS} />,
+    run: async () => {
+      openNewBot();
+    },
+  });
 
   const rootGroups = buildRootGroups({ actionItems, recentThreadItems });
   // Every setting goes to the palette's own matcher, so settings get the same

@@ -578,6 +578,10 @@
     "./provider-instance-ids": {
       "types": "./src/providerInstanceIds.ts",
       "default": "./src/providerInstanceIds.ts"
+    },
+    "./state/botHq": {
+      "types": "./src/state/botHq.ts",
+      "default": "./src/state/botHq.ts"
     }
   },
   "scripts": {

@@ -1,4 +1,12 @@
 import {
+  BotHqReadInput,
+  BotHqReadResult,
+  BotHqMutation,
+  BotHqMutationResult,
+  BotHqEvent,
+  BotHqError,
+} from "./botHq.ts";
+import {
   OrchestrationV2SearchThreadError,
   OrchestrationV2SearchThreadInput,
   OrchestrationV2SearchThreadResult,
@@ -415,6 +423,9 @@ import { VcsError } from "./vcs.ts";
 import { Project, ProjectMutation, ProjectMutationError } from "./project.ts";
 
 export const WS_METHODS = {
+  botHqRead: "botHq.read",
+  botHqMutate: "botHq.mutate",
+  botHqEvents: "botHq.events",
   projectsListEntries: "projects.listEntries",
   projectsListIgnoredFiles: "projects.listIgnoredFiles",
   projectsReadFile: "projects.readFile",
@@ -2110,7 +2121,27 @@ export class RpcScopeAuthorization extends RpcMiddleware.Service<RpcScopeAuthori
   { error: EnvironmentAuthorizationError },
 ) {}
 
+const WsBotHqReadRpc = Rpc.make(WS_METHODS.botHqRead, {
+  payload: BotHqReadInput,
+  success: BotHqReadResult,
+  error: Schema.Union([BotHqError, EnvironmentAuthorizationError]),
+});
+const WsBotHqMutateRpc = Rpc.make(WS_METHODS.botHqMutate, {
+  payload: BotHqMutation,
+  success: BotHqMutationResult,
+  error: Schema.Union([BotHqError, EnvironmentAuthorizationError]),
+});
+const WsBotHqEventsRpc = Rpc.make(WS_METHODS.botHqEvents, {
+  payload: Schema.Struct({}),
+  success: BotHqEvent,
+  error: Schema.Union([BotHqError, EnvironmentAuthorizationError]),
+  stream: true,
+});
+
 export const WsRpcGroup = RpcGroup.make(
+  WsBotHqReadRpc,
+  WsBotHqMutateRpc,
+  WsBotHqEventsRpc,
   WsGuestShareCreateRpc,
   WsServerProbeRpc,
   WsServerGetConfigRpc,

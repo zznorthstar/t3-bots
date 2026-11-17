@@ -1,3 +1,5 @@
+import * as BotHq from "./bots/BotHq.ts";
+import * as BotHqHttp from "./bots/http.ts";
 import * as ProviderEventLoggers from "@t3tools/provider-core/server/ProviderEventLoggers";
 import type { RelayManagedEndpointRuntimeConfig } from "@t3tools/contracts/relay";
 import * as Random from "effect/Random";
@@ -840,6 +842,7 @@ const layerMakeRoutes = Layer.mergeAll(
     GuestHttp.layer,
     DeviceHubProxy.layer,
     ServerBrowserStream.routeLayer,
+    BotHqHttp.layer,
     ServerHttp.layerStaticAndDevRoute,
     Ws.layer,
     speechStreamRouteLayer,
@@ -1319,10 +1322,13 @@ const layerMakeServer = Layer.unwrap(
       ).pipe(Effect.asVoid),
     }).pipe(Layer.provideMerge(layerRuntimeDependencies), Layer.provide(layerLauncher));
 
-    const layerRoutes = HttpRouter.serve(layerMakeRoutes.pipe(Layer.provide(layerLauncher)), {
-      disableLogger: !config.logWebSocketEvents,
-      routerConfig: HTTP_ROUTER_CONFIG,
-    }).pipe(
+    const layerRoutes = HttpRouter.serve(
+      layerMakeRoutes.pipe(Layer.provide(BotHq.layer), Layer.provide(layerLauncher)),
+      {
+        disableLogger: !config.logWebSocketEvents,
+        routerConfig: HTTP_ROUTER_CONFIG,
+      },
+    ).pipe(
       withUntracedRequests,
       Layer.tap(() => Deferred.succeed(routesReady, undefined).pipe(Effect.orDie)),
     );
