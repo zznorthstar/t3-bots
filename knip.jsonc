@@ -30,6 +30,8 @@
         "fixtures/*/*.js",
         "knip-schemas.ts",
         "linux-after-pack.ts",
+        // Copied into the bot installer and executed by the bundled Node runtime.
+        "install-bot-desktop.mjs",
         "mobile-behavior/run.ts",
         "mobile-native-client.ts",
         // e2e loads its config and the scenarios by path, and starts the app script.

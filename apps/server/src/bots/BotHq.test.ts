@@ -1,5 +1,6 @@
 import { BotHqError } from "@t3tools/contracts";
 import { describe, expect, it } from "@effect/vitest";
+import { vi } from "vite-plus/test";
 import * as ConfigProvider from "effect/ConfigProvider";
 import * as Deferred from "effect/Deferred";
 import * as Effect from "effect/Effect";
@@ -12,6 +13,16 @@ import { HttpClient, HttpClientResponse } from "effect/http";
 import * as BotHq from "./BotHq.ts";
 
 const isBotHqError = Schema.is(BotHqError);
+const socketState = vi.hoisted(() => ({ closed: 0 }));
+vi.mock("undici", () => ({
+  WebSocket: class extends EventTarget {
+    readyState = 1;
+    binaryType = "arraybuffer";
+    close() {
+      socketState.closed++;
+    }
+  },
+}));
 
 const response = (
   request: HttpClientResponse.HttpClientResponse["request"],
@@ -25,6 +36,36 @@ const response = (
   );
 
 describe("Bot HQ adapter", () => {
+  it.effect("closes the upstream desktop transport when its viewer scope ends", () => {
+    socketState.closed = 0;
+    const client = HttpClient.make((request) =>
+      Effect.succeed(
+        response(request, {}, 200, { "set-cookie": "grokbot_session=test; HttpOnly" }),
+      ),
+    );
+    return Effect.gen(function* () {
+      const bots = yield* BotHq.BotHq;
+      yield* Effect.scoped(
+        Effect.gen(function* () {
+          const socket = yield* bots.screen("bot_one", "control");
+          yield* socket.reader;
+        }),
+      );
+      expect(socketState.closed).toBe(1);
+    }).pipe(
+      Effect.provide(
+        BotHq.layer.pipe(
+          Layer.provide(Layer.succeed(HttpClient.HttpClient, client)),
+          Layer.provide(
+            ConfigProvider.layer(
+              ConfigProvider.fromUnknown({ BOT_HQ_URL: "http://127.0.0.1:8787" }),
+            ),
+          ),
+        ),
+      ),
+    );
+  });
+
   it.effect("waits for a newly provisioning Hermes bot to finish deletion", () =>
     Effect.gen(function* () {
       const deleting = yield* Deferred.make<void>();

@@ -21,10 +21,34 @@ can view bots but cannot create one, send messages or take control of its comput
 Deleting a bot removes its conversation, memory, files and managed computer. It does not
 delete your T3 projects or coding threads.
 
-## Run this fork with bots
+## Install on Linux
 
-This first integration uses the local Bot HQ runtime alongside T3's server, with one
-T3 interface. It currently supports web and desktop; the mobile app has no bot screens.
+Keep the Linux package archive, its `.sha256` file and `install.sh` together. Run:
+
+```sh
+./install.sh
+```
+
+Open **T3 Code + Bots** from your applications menu, or run `t3code-bots`. The installer
+includes T3, Bot HQ and Bot HQ's Node runtime. Both servers start automatically and listen
+on localhost. Updates use the same installer and retain your conversations and bot homes.
+The fork's automatic upstream updates are disabled.
+
+Install Hermes and its local desktop prerequisites first, following
+[the local Hermes setup](https://github.com/zznorthstar/bot-hq/blob/feat/local-hermes-desktops/docs/LOCAL_SETUP.md).
+The installer checks your Linux library version against this build's requirements.
+It asks for Linux administrator authentication to configure Electron's sandbox helper.
+
+The app installs under `~/.local/opt/t3code-bots` with its own shortcut. Its T3 data,
+Electron profile, bots and files live under `~/.t3-bots`, separate from other T3 installs.
+Bot computers are local desktops running as your Linux user.
+
+For building the installer, see [Build the bot desktop](../operations/build-bots-desktop.md).
+
+## Run from source
+
+The integration uses the local Bot HQ runtime alongside T3's server, with one T3
+interface. It supports web and Linux desktop; the mobile app has no bot screens.
 
 Build the [local Hermes version of Bot HQ](https://github.com/zznorthstar/bot-hq/tree/feat/local-hermes-desktops)
 in a sibling `bot-hq` directory and follow its local desktop prerequisites. In this T3

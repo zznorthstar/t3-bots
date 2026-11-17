@@ -7,6 +7,18 @@ import * as PlatformError from "effect/PlatformError";
 
 import { clearStaleGpuCaches, resolveUserDataPath } from "./DesktopUserData.ts";
 
+it.effect("keeps a bundled bot desktop out of an existing Electron profile", () =>
+  Effect.gen(function* () {
+    const directory = yield* resolveUserDataPath({
+      appDataDirectory: "/existing/config",
+      isDevelopment: false,
+      platform: "linux",
+      userDataPathOverride: "/isolated/bots/electron",
+    });
+    assert.equal(directory, "/isolated/bots/electron");
+  }).pipe(Effect.provide(NodeServices.layer)),
+);
+
 it.effect.each(["t3code", "T3 Code (Alpha)"])(
   "preserves Windows credential keys from %s without copying browser databases",
   (sourceName) =>

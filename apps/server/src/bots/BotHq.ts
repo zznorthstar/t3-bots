@@ -219,12 +219,15 @@ const make = Effect.gen(function* () {
     const base = yield* origin;
     const session = yield* signIn();
     return yield* Socket.fromWebSocket(
-      Effect.sync(
-        () =>
-          new Undici.WebSocket(
-            `${base.replace("http:", "ws:")}/api/bots/${botId}/screen?mode=${mode}`,
-            { protocols: ["binary"], headers: { cookie: session } },
-          ),
+      Effect.acquireRelease(
+        Effect.sync(
+          () =>
+            new Undici.WebSocket(
+              `${base.replace("http:", "ws:")}/api/bots/${botId}/screen?mode=${mode}`,
+              { protocols: ["binary"], headers: { cookie: session } },
+            ),
+        ),
+        (socket) => Effect.sync(() => socket.close()),
       ),
     );
   });
