@@ -24,7 +24,10 @@ vi.mock("~/state/botHq", async () => {
   const { Atom } = await import("effect/reactivity");
   const allowed = Atom.make(true);
   const denied = Atom.make(false);
-  return { botHq: { mutate: { permissionAtom: () => (state.allowed ? allowed : denied) } } };
+  return {
+    useBotHqRead: () => ({ data: undefined }),
+    botHq: { mutate: { permissionAtom: () => (state.allowed ? allowed : denied) } },
+  };
 });
 vi.mock("~/state/use-atom-command", () => ({ useAtomCommand: () => state.mutate }));
 

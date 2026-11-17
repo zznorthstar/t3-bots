@@ -60,8 +60,60 @@ const mutationRequest = (input: BotHqMutation) => {
           }
         : null;
     case "send":
-      return input.text.trim().length > 0 && input.text.length <= 100_000
-        ? { method: "POST" as const, path: `${base}/messages`, body: { text: input.text } }
+      return (input.text.trim().length > 0 || (input.attachmentIds?.length ?? 0) > 0) &&
+        input.text.length <= 100_000
+        ? {
+            method: "POST" as const,
+            path: `${base}/messages`,
+            body: { text: input.text, attachmentIds: input.attachmentIds, voice: input.voice },
+          }
+        : null;
+    case "upload":
+      return input.data.length <= 14_000_000 && input.name.length <= 255
+        ? {
+            method: "POST" as const,
+            path: `${base}/attachments`,
+            body: { name: input.name, mime: input.mime, data: input.data },
+          }
+        : null;
+    case "avatar":
+      return input.dataUrl === null || input.dataUrl.length <= 350_000
+        ? { method: "POST" as const, path: `${base}/avatar`, body: { dataUrl: input.dataUrl } }
+        : null;
+    case "profile":
+      return input.name.trim() && input.name.length <= 60 && input.instructions.length <= 20_000
+        ? {
+            method: "PATCH" as const,
+            path: base,
+            body: {
+              name: input.name,
+              label: input.label,
+              instructions: input.instructions,
+              localVoice: input.localVoice,
+            },
+          }
+        : null;
+    case "connect-primary":
+      return { method: "POST" as const, path: "/primary/connect", body: { name: input.name } };
+    case "voice-warm":
+      return { method: "POST" as const, path: "/voice/local/warm" };
+    case "voice-setup":
+      return { method: "POST" as const, path: "/voice/local/setup" };
+    case "voice-transcribe":
+      return input.data.length <= 5_400_000
+        ? {
+            method: "POST" as const,
+            path: "/voice/local/transcribe",
+            body: { botId: input.botId, data: input.data },
+          }
+        : null;
+    case "voice-speak":
+      return input.text.length <= 1200
+        ? {
+            method: "POST" as const,
+            path: "/voice/local/speak",
+            body: { botId: input.botId, text: input.text, voice: input.voice },
+          }
         : null;
     case "interrupt":
       return { method: "POST" as const, path: `${base}/interrupt` };
@@ -154,7 +206,15 @@ const make = Effect.gen(function* () {
               Effect.mapError((cause) => new BotHqError({ reason: "invalid_request", cause })),
             );
       return yield* client.execute(input).pipe(
-        Effect.timeout(method === "DELETE" ? "2 minutes" : "30 seconds"),
+        Effect.timeout(
+          path === "/voice/local/setup"
+            ? "10 minutes"
+            : path.startsWith("/voice/local/")
+              ? "90 seconds"
+              : method === "DELETE"
+                ? "2 minutes"
+                : "30 seconds",
+        ),
         Effect.mapError((cause) => new BotHqError({ reason: "unavailable", cause })),
       );
     });
@@ -174,12 +234,20 @@ const make = Effect.gen(function* () {
         Effect.mapError((cause) => new BotHqError({ reason: "request_failed", cause })),
       );
   const read = Effect.fn("BotHq.read")(function* (input: BotHqReadInput) {
-    if (input.resource !== "bots" && !validId(input.botId))
+    if (!["bots", "voice", "primary"].includes(input.resource) && !validId(input.botId))
+      return yield* new BotHqError({ reason: "invalid_request" });
+    if (input.resource === "file" && !validId(input.fileId))
       return yield* new BotHqError({ reason: "invalid_request" });
     const path =
       input.resource === "bots"
         ? "/bots"
-        : `/bots/${input.botId}/${input.resource === "memories" ? "settings" : input.resource}`;
+        : input.resource === "voice"
+          ? "/voice/local/status"
+          : input.resource === "primary"
+            ? "/primary/status"
+            : input.resource === "file"
+              ? `/bots/${input.botId}/attachments/${input.fileId}`
+              : `/bots/${input.botId}/${input.resource === "memories" ? "settings" : input.resource}`;
     const response = yield* request("GET", path);
     return yield* response.json.pipe(
       Effect.mapError((cause) => new BotHqError({ reason: "request_failed", cause })),

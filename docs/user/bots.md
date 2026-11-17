@@ -18,8 +18,9 @@ Pending action requests appear in the conversation. Allow an action once or decl
 answer a question through its options or by sending a message. A read-only connection
 can view bots but cannot create one, send messages or take control of its computer.
 
-Deleting a bot removes its conversation, memory, files and managed computer. It does not
-delete your T3 projects or coding threads.
+Deleting a managed bot removes its conversation, memory, files and computer. Disconnecting
+a linked Hermes agent removes its T3 + Bots conversation and uploads; its existing Hermes
+home, memory and Discord connection remain available.
 
 ## Install on Linux
 
@@ -68,5 +69,40 @@ its loopback HTTP origin. The runtime must have local email sign-in enabled and 
 `t3@localhost`. It is a trusted local service; don't expose its development sign-in to the
 network. Remote T3 clients reach bots through their authenticated T3 connection.
 
-Voice and connected-app configuration are still managed by the Bot HQ runtime and are
-not yet exposed in T3's bot panel. Live desktop use requires the Hermes desktop packages.
+## Files, photos and voice
+
+Use the paperclip to attach files, drop files onto the composer, or paste an image. Attach
+up to ten files per message, each up to 10 MB. Attached images and text are available to
+the agent. Other files stay in its library. File chips in the transcript download the original.
+
+Open the gear beside the bot name to edit its instructions, upload a PNG/JPEG/WebP avatar
+or choose a voice. Avatars appear beside messages and in the sidebar. Messages from another
+bot carry that bot’s name and photo.
+
+Choose **Call** to talk using local Whisper recognition and Kokoro speech. Allow microphone
+access, then speak naturally; speaking over the bot stops its playback and interrupts its
+current turn. Mute or end the call using the call controls. Closing the conversation also
+releases the microphone. Headphones help the microphone distinguish your voice from playback.
+English speech models run on this PC; the Hermes language model keeps its existing provider.
+Speech has no API fees. On a fresh install, use **Install local voice models** in bot settings
+first (requires `uv`, internet access for the initial downloads and roughly 600 MB of storage).
+
+## Connect an existing Hermes agent
+
+The installed app can link the Hermes gateway already running on this PC. It shares the
+agent’s persona, tools and memory. Discord keeps working; recent Discord conversation appears
+in the bot’s chat and provides context for app replies. App chats use their own API conversation.
+The agent can read team discussions from Discord and message other bots through its HQ tools.
+
+To enable the authenticated loopback API and team tools, run the bundled setup command:
+
+```sh
+~/.local/opt/t3code-bots/current/bot-hq/node \
+  ~/.local/opt/t3code-bots/current/bot-hq/server/box/link-primary.mjs
+hermes gateway restart
+```
+
+The setup saves private backups beside Hermes’ `.env` and `config.yaml`, preserves its terminal
+backend and Discord credentials, and adds the HQ MCP connection. Then choose **New bot →
+Connect Hermes** (or the name of an already linked agent). A Docker-backed Hermes computer
+stays inside its existing sandbox. Connected-app credentials continue to use Bot HQ configuration.

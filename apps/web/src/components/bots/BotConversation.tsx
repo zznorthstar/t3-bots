@@ -1,8 +1,16 @@
 import { useAtomValue } from "@effect/atom-react";
 import { mergeBotRows } from "@t3tools/client-runtime/state/botHq";
-import type { BotHqRow, EnvironmentId } from "@t3tools/contracts";
+import type { BotHqAttachment, BotHqBot, BotHqRow, EnvironmentId } from "@t3tools/contracts";
 import { useNavigate } from "@tanstack/react-router";
-import { ArrowUpIcon, BotIcon, MonitorIcon, SquareIcon, Trash2Icon } from "lucide-react";
+import {
+  ArrowUpIcon,
+  MonitorIcon,
+  PaperclipIcon,
+  SettingsIcon,
+  SquareIcon,
+  Trash2Icon,
+  XIcon,
+} from "lucide-react";
 import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { botHq, useBotHq, useBotHqRead } from "~/state/botHq";
 import { useAtomCommand } from "~/state/use-atom-command";
@@ -27,6 +35,11 @@ import {
   DialogFooter,
 } from "../ui/dialog";
 import type { RightPanelSurface } from "~/rightPanelStore";
+import { BotAvatar } from "./BotAvatar";
+import { BotSettingsDialog } from "./BotSettingsDialog";
+import { BotVoiceCall } from "./BotVoiceCall";
+import { botMessageAuthor } from "./botMessageAuthor";
+import { downloadBotAttachment, fileBase64 } from "./botMedia";
 
 const botSurface: RightPanelSurface = { id: "bot", kind: "bot" };
 const nothing = () => {};
@@ -35,15 +48,20 @@ function BotTranscriptRow({
   row,
   environmentId,
   allowed,
+  bot,
+  bots,
 }: {
   row: BotHqRow;
   environmentId: EnvironmentId;
   allowed: boolean;
+  bot: BotHqBot;
+  bots: ReadonlyArray<BotHqBot>;
 }) {
   const mutate = useAtomCommand(botHq.mutate, { reportFailure: false });
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const body = row.body;
+  const author = botMessageAuthor(row, bot, bots);
   const act = async (input: Parameters<typeof mutate>[0]["input"]) => {
     setPending(true);
     setError(null);
@@ -53,24 +71,54 @@ function BotTranscriptRow({
   };
   if (body.type === "message")
     return (
-      <article
-        className={
-          body.role === "user"
-            ? "ml-auto w-fit max-w-[90%] rounded-xl bg-muted px-4 py-3 text-sm"
-            : "text-sm leading-relaxed"
-        }
-      >
-        {body.role === "user" ? (
-          <p className="whitespace-pre-wrap break-words">{body.text}</p>
-        ) : (
-          <ChatMarkdown
-            text={body.text ?? ""}
-            cwd={undefined}
-            environmentId={environmentId}
-            isStreaming={body.streaming ?? false}
-          />
-        )}
-      </article>
+      <div className={"flex max-w-full items-start gap-3 " + (author.isUser ? "justify-end" : "")}>
+        {!author.isUser ? (
+          <BotAvatar bot={author.bot} name={author.name} environmentId={environmentId} />
+        ) : null}
+        <article
+          className={
+            author.isUser
+              ? "w-fit max-w-[90%] rounded-xl bg-muted px-4 py-3 text-sm"
+              : "min-w-0 flex-1 text-sm leading-relaxed"
+          }
+        >
+          <p className="mb-1 text-xs font-medium text-muted-foreground">{author.name}</p>
+          {author.isUser || body.role === "user" ? (
+            <p className="whitespace-pre-wrap break-words">{body.text}</p>
+          ) : (
+            <ChatMarkdown
+              text={body.text ?? ""}
+              cwd={undefined}
+              environmentId={environmentId}
+              isStreaming={body.streaming ?? false}
+            />
+          )}
+          {body.attachments?.length ? (
+            <div className="mt-2 flex flex-wrap gap-2">
+              {body.attachments.map((file) => (
+                <Button
+                  key={file.id}
+                  variant="outline"
+                  size="xs"
+                  onClick={() =>
+                    void downloadBotAttachment(environmentId, row.botId, file).catch(() =>
+                      setError("This file could not be downloaded."),
+                    )
+                  }
+                >
+                  <PaperclipIcon />
+                  <span className="max-w-52 truncate">{file.name}</span>
+                </Button>
+              ))}
+            </div>
+          ) : null}
+          {error ? (
+            <p role="alert" className="mt-2 text-xs text-destructive">
+              {error}
+            </p>
+          ) : null}
+        </article>
+      </div>
     );
   if (body.type === "card")
     return (
@@ -162,6 +210,10 @@ export function BotConversation({
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [attachments, setAttachments] = useState<BotHqAttachment[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const uploadInput = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const resync = useEffectEvent(transcript.refresh);
   // oxlint-disable-next-line t3code/no-unreasoned-state-sync -- fetch the authoritative transcript after reconnecting the runtime event stream
@@ -194,10 +246,58 @@ export function BotConversation({
     return result;
   };
   const send = async () => {
-    if (!text.trim() || pending || !allowed) return;
+    if ((!text.trim() && !attachments.length) || pending || uploading || !allowed) return;
     const submitted = text;
-    const result = await act({ _tag: "send", botId, text: submitted });
-    if (result._tag === "Success") setText((current) => (current === submitted ? "" : current));
+    const result = await act({
+      _tag: "send",
+      botId,
+      text: submitted,
+      attachmentIds: attachments.map((file) => file.id),
+    });
+    if (result._tag === "Success") {
+      setText((current) => (current === submitted ? "" : current));
+      setAttachments([]);
+    }
+  };
+  const uploadFiles = async (files: File[]) => {
+    if (!allowed || uploading) return;
+    if (attachments.length + files.length > 10) {
+      setError("Attach up to 10 files per message.");
+      return;
+    }
+    setUploading(true);
+    setError(null);
+    try {
+      for (const file of files) {
+        if (file.size > 10 * 1024 * 1024) {
+          setError(`${file.name} is larger than 10 MB.`);
+          break;
+        }
+        const result = await mutate({
+          environmentId,
+          input: {
+            _tag: "upload",
+            botId,
+            name: file.name,
+            mime: file.type || "application/octet-stream",
+            data: await fileBase64(file),
+          },
+        });
+        if (result._tag !== "Success") {
+          setError(botCommandError(result));
+          break;
+        }
+        const attachment = result.value.attachment;
+        if (!attachment) {
+          setError("The file upload did not finish. Retry it.");
+          break;
+        }
+        setAttachments((current) => [...current, attachment]);
+      }
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Could not upload this file.");
+    }
+    setUploading(false);
   };
   return (
     <SidebarInset className="h-dvh min-h-0 overflow-hidden">
@@ -205,7 +305,7 @@ export function BotConversation({
         <section className="flex min-h-0 min-w-0 flex-1 flex-col">
           <WorkspacePageHeader electron={isElectron}>
             <SidebarTrigger />
-            <BotIcon className="size-4 shrink-0 text-muted-foreground" />
+            <BotAvatar bot={bot} environmentId={environmentId} size="small" />
             <div className="min-w-0 flex-1">
               <h1 className="truncate text-sm font-medium">{bot?.name ?? "Bot"}</h1>
             </div>
@@ -216,6 +316,15 @@ export function BotConversation({
               onClick={() => setPanelOpen(!panelOpen)}
             >
               <MonitorIcon />
+            </Button>
+            <Button
+              variant="ghost-muted"
+              size="icon-sm"
+              aria-label="Bot settings"
+              disabled={!bot}
+              onClick={() => setSettingsOpen(true)}
+            >
+              <SettingsIcon />
             </Button>
             <Button
               variant="ghost-destructive"
@@ -265,6 +374,8 @@ export function BotConversation({
                         row={row}
                         environmentId={environmentId}
                         allowed={allowed}
+                        bot={bot}
+                        bots={state.bots}
                       />
                     ))
                   )}
@@ -286,6 +397,15 @@ export function BotConversation({
               </ScrollArea>
               <form
                 className="mx-auto w-full max-w-3xl space-y-2 px-5 pb-5"
+                onDragOver={(event) => {
+                  if (event.dataTransfer.types.includes("Files")) event.preventDefault();
+                }}
+                onDrop={(event) => {
+                  if (event.dataTransfer.files.length) {
+                    event.preventDefault();
+                    void uploadFiles(Array.from(event.dataTransfer.files));
+                  }
+                }}
                 onSubmit={(event) => {
                   event.preventDefault();
                   void send();
@@ -308,6 +428,12 @@ export function BotConversation({
                   placeholder={`Message ${bot.name}…`}
                   maxLength={100_000}
                   disabled={!allowed}
+                  onPaste={(event) => {
+                    if (event.clipboardData.files.length) {
+                      event.preventDefault();
+                      void uploadFiles(Array.from(event.clipboardData.files));
+                    }
+                  }}
                   onKeyDown={(event) => {
                     if (
                       event.key === "Enter" &&
@@ -319,13 +445,67 @@ export function BotConversation({
                     }
                   }}
                 />
-                <div className="flex items-center justify-between gap-3">
-                  <p className="truncate text-xs text-muted-foreground">
-                    {allowed
-                      ? [bot.provider, bot.model].filter(Boolean).join(" · ") ||
-                        "Hermes · Persistent assistant"
-                      : "Read-only connection"}
+                <input
+                  ref={uploadInput}
+                  type="file"
+                  multiple
+                  hidden
+                  onChange={(event) => {
+                    const files = Array.from(event.currentTarget.files ?? []);
+                    event.currentTarget.value = "";
+                    void uploadFiles(files);
+                  }}
+                />
+                {attachments.length ? (
+                  <div className="flex flex-wrap gap-2">
+                    {attachments.map((file) => (
+                      <div
+                        key={file.id}
+                        className="flex max-w-full items-center gap-1 rounded-md border px-2 py-1 text-xs"
+                      >
+                        <PaperclipIcon className="size-3" />
+                        <span className="max-w-48 truncate">{file.name}</span>
+                        <Button
+                          type="button"
+                          variant="ghost-muted"
+                          size="icon-micro"
+                          aria-label={`Remove ${file.name}`}
+                          onClick={() =>
+                            setAttachments((current) =>
+                              current.filter((item) => item.id !== file.id),
+                            )
+                          }
+                        >
+                          <XIcon />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+                {uploading ? (
+                  <p role="status" className="text-xs text-muted-foreground">
+                    Uploading attachments…
                   </p>
+                ) : null}
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <Button
+                      type="button"
+                      size="icon-sm"
+                      variant="ghost-muted"
+                      aria-label="Attach files"
+                      disabled={!allowed || uploading || pending}
+                      onClick={() => uploadInput.current?.click()}
+                    >
+                      <PaperclipIcon />
+                    </Button>
+                    <p className="truncate text-xs text-muted-foreground">
+                      {allowed
+                        ? [bot.provider, bot.model].filter(Boolean).join(" · ") ||
+                          "Hermes · Persistent assistant"
+                        : "Read-only connection"}
+                    </p>
+                  </div>
                   <div className="flex gap-2">
                     {live?.isRunning ? (
                       <Button
@@ -343,12 +523,15 @@ export function BotConversation({
                       type="submit"
                       size="icon-sm"
                       aria-label="Send message"
-                      disabled={!allowed || !text.trim() || pending}
+                      disabled={
+                        !allowed || (!text.trim() && !attachments.length) || pending || uploading
+                      }
                     >
                       <ArrowUpIcon />
                     </Button>
                   </div>
                 </div>
+                <BotVoiceCall environmentId={environmentId} bot={bot} rows={rows} />
               </form>
             </>
           )}
@@ -409,7 +592,9 @@ export function BotConversation({
             <DialogHeader>
               <DialogTitle>Delete {bot?.name ?? "bot"}?</DialogTitle>
               <DialogDescription>
-                This removes this bot’s conversation, memory, files and managed computer.
+                {bot?.engineKind === "primary"
+                  ? "This disconnects Hermes from T3 + Bots and removes this app’s conversation and uploaded files. Your Hermes agent and Discord connection stay available."
+                  : "This removes this bot’s conversation, memory, files and managed computer."}
               </DialogDescription>
             </DialogHeader>
             {error ? (
@@ -434,6 +619,13 @@ export function BotConversation({
             </DialogFooter>
           </DialogPopup>
         </Dialog>
+        {settingsOpen && bot ? (
+          <BotSettingsDialog
+            bot={bot}
+            environmentId={environmentId}
+            onClose={() => setSettingsOpen(false)}
+          />
+        ) : null}
       </div>
     </SidebarInset>
   );

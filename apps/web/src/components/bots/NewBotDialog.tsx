@@ -4,7 +4,7 @@ import { EnvironmentId } from "@t3tools/contracts";
 import { useNavigate } from "@tanstack/react-router";
 import { BotIcon } from "lucide-react";
 import { useEffect, useState } from "react";
-import { botHq } from "~/state/botHq";
+import { botHq, useBotHqRead } from "~/state/botHq";
 import { primaryEnvironmentIdAtom } from "~/state/primaryEnvironment";
 import { useEnvironments } from "~/state/environments";
 import { useAtomCommand } from "~/state/use-atom-command";
@@ -46,6 +46,30 @@ function NewBotDialog({
   const mutate = useAtomCommand(botHq.mutate, { reportFailure: false });
   const navigate = useNavigate();
   const { environments } = useEnvironments();
+  const primary = useBotHqRead(environmentId, { resource: "primary" });
+  const connect = async () => {
+    if (pending || !allowed) return;
+    setPending(true);
+    setError(null);
+    const result = await mutate({
+      environmentId,
+      input: { _tag: "connect-primary", name: primary.data?.primary?.name ?? "Hermes" },
+    });
+    setPending(false);
+    if (result._tag !== "Success") {
+      setError(botCommandError(result));
+      return;
+    }
+    if (!result.value.bot) {
+      setError("The existing agent could not be linked. Retry.");
+      return;
+    }
+    onClose();
+    void navigate({
+      to: "/bots/$environmentId/$botId",
+      params: { environmentId, botId: result.value.bot.id },
+    });
+  };
   const create = async () => {
     if (!name.trim() || pending || !allowed) return;
     setPending(true);
@@ -110,6 +134,21 @@ function NewBotDialog({
                     ))}
                   </SelectPopup>
                 </Select>
+              </div>
+            ) : null}
+            {primary.data?.primary?.available && !primary.data.primary.linkedBotId ? (
+              <div className="space-y-2 border-b pb-4">
+                <p className="text-sm text-muted-foreground">
+                  Your existing Hermes agent is available on this PC.
+                </p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={pending || !allowed}
+                  onClick={() => void connect()}
+                >
+                  Connect {primary.data.primary.name}
+                </Button>
               </div>
             ) : null}
             <div className="space-y-2">

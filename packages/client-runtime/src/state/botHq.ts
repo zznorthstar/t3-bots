@@ -103,10 +103,20 @@ export function createBotHqAtoms<R, E>(runtime: Atom.AtomRuntime<EnvironmentRegi
       tag: WS_METHODS.botHqMutate,
       onSuccess: ({ environmentId, input }, registry) =>
         Effect.sync(() => {
+          if (input._tag?.startsWith("voice-")) {
+            if (input._tag === "voice-setup" || input._tag === "voice-warm")
+              registry.refresh(read({ environmentId, input: { resource: "voice" } }));
+            return;
+          }
+          if (input._tag === "upload") return;
           registry.refresh(read({ environmentId, input: { resource: "bots" } }));
           if ("botId" in input)
             registry.refresh(
               read({ environmentId, input: { resource: "rows", botId: input.botId } }),
+            );
+          if (input._tag === "avatar")
+            registry.refresh(
+              read({ environmentId, input: { resource: "avatar", botId: input.botId } }),
             );
         }),
     }),

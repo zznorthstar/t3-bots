@@ -1,5 +1,13 @@
 import * as Schema from "effect/Schema";
 
+export const BotHqAttachment = Schema.Struct({
+  id: Schema.String,
+  name: Schema.String,
+  mime: Schema.String,
+  size: Schema.Number,
+});
+export type BotHqAttachment = typeof BotHqAttachment.Type;
+
 export const BotHqBot = Schema.Struct({
   id: Schema.String,
   name: Schema.String,
@@ -8,6 +16,9 @@ export const BotHqBot = Schema.Struct({
   instructions: Schema.String,
   avatarColor: Schema.String,
   avatarShape: Schema.String,
+  avatarVersion: Schema.optional(Schema.NullOr(Schema.String)),
+  localVoice: Schema.optional(Schema.String),
+  engineKind: Schema.optional(Schema.NullOr(Schema.Literals(["primary", "managed"]))),
   lastPreview: Schema.NullOr(Schema.String),
   unread: Schema.Number,
   generation: Schema.Number,
@@ -28,6 +39,14 @@ export const BotHqRow = Schema.Struct({
     role: Schema.optional(Schema.String),
     text: Schema.optional(Schema.String),
     streaming: Schema.optional(Schema.Boolean),
+    from: Schema.optional(
+      Schema.Struct({
+        kind: Schema.Literals(["bot", "routine", "voice", "discord"]),
+        id: Schema.String,
+        name: Schema.String,
+      }),
+    ),
+    attachments: Schema.optional(Schema.Array(BotHqAttachment)),
     label: Schema.optional(Schema.String),
     name: Schema.optional(Schema.String),
     summary: Schema.optional(Schema.String),
@@ -50,12 +69,42 @@ export const BotHqLive = Schema.Struct({
 });
 
 export const BotHqReadInput = Schema.Struct({
-  resource: Schema.Literals(["bots", "rows", "tasks", "routines", "memories"]),
+  resource: Schema.Literals([
+    "bots",
+    "rows",
+    "tasks",
+    "routines",
+    "memories",
+    "avatar",
+    "file",
+    "voice",
+    "primary",
+  ]),
   botId: Schema.optional(Schema.String),
+  fileId: Schema.optional(Schema.String),
+  version: Schema.optional(Schema.String),
 });
 export type BotHqReadInput = typeof BotHqReadInput.Type;
 
 export const BotHqReadResult = Schema.Struct({
+  avatar: Schema.optional(Schema.NullOr(Schema.String)),
+  file: Schema.optional(Schema.Struct({ ...BotHqAttachment.fields, data: Schema.String })),
+  voice: Schema.optional(
+    Schema.Struct({
+      installed: Schema.Boolean,
+      ready: Schema.Boolean,
+      provider: Schema.String,
+      voices: Schema.Array(Schema.String),
+    }),
+  ),
+  primary: Schema.optional(
+    Schema.Struct({
+      available: Schema.Boolean,
+      name: Schema.String,
+      linkedBotId: Schema.NullOr(Schema.String),
+      discordSessions: Schema.Number,
+    }),
+  ),
   bots: Schema.optional(Schema.Array(BotHqBot)),
   live: Schema.optional(Schema.Array(BotHqLive)),
   generation: Schema.optional(Schema.Number),
@@ -98,7 +147,31 @@ export const BotHqMutation = Schema.Union([
     label: Schema.String,
     instructions: Schema.String,
   }),
-  Schema.TaggedStruct("send", { ...botId, text: Schema.String }),
+  Schema.TaggedStruct("send", {
+    ...botId,
+    text: Schema.String,
+    attachmentIds: Schema.optional(Schema.Array(Schema.String)),
+    voice: Schema.optional(Schema.Boolean),
+  }),
+  Schema.TaggedStruct("upload", {
+    ...botId,
+    name: Schema.String,
+    mime: Schema.String,
+    data: Schema.String,
+  }),
+  Schema.TaggedStruct("avatar", { ...botId, dataUrl: Schema.NullOr(Schema.String) }),
+  Schema.TaggedStruct("profile", {
+    ...botId,
+    name: Schema.String,
+    label: Schema.String,
+    instructions: Schema.String,
+    localVoice: Schema.String,
+  }),
+  Schema.TaggedStruct("connect-primary", { name: Schema.String }),
+  Schema.TaggedStruct("voice-warm", {}),
+  Schema.TaggedStruct("voice-setup", {}),
+  Schema.TaggedStruct("voice-transcribe", { ...botId, data: Schema.String }),
+  Schema.TaggedStruct("voice-speak", { ...botId, text: Schema.String, voice: Schema.String }),
   Schema.TaggedStruct("interrupt", botId),
   Schema.TaggedStruct("delete", botId),
   Schema.TaggedStruct("reset", botId),
@@ -112,6 +185,11 @@ export const BotHqMutation = Schema.Union([
 ]);
 export type BotHqMutation = typeof BotHqMutation.Type;
 export const BotHqMutationResult = Schema.Struct({
+  attachment: Schema.optional(BotHqAttachment),
+  text: Schema.optional(Schema.String),
+  audio: Schema.optional(Schema.Struct({ data: Schema.String, mime: Schema.String })),
+  ready: Schema.optional(Schema.Boolean),
+  voices: Schema.optional(Schema.Array(Schema.String)),
   bot: Schema.optional(BotHqBot),
   row: Schema.optional(BotHqRow),
   ok: Schema.optional(Schema.Boolean),

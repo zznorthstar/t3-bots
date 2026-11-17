@@ -1,6 +1,6 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import type { EnvironmentId } from "@t3tools/contracts";
-import { BotIcon } from "lucide-react";
+import { BotAvatar } from "./BotAvatar";
 import { useBotHq } from "~/state/botHq";
 import { useEnvironments } from "~/state/environments";
 import {
@@ -32,7 +32,7 @@ function EnvironmentBots({ environmentId }: { environmentId: EnvironmentId }) {
               }}
               tooltip={bot.label || bot.name}
             >
-              <BotIcon />
+              <BotAvatar bot={bot} environmentId={environmentId} size="small" />
               <span className="truncate">{bot.name}</span>
               {bot.unread > 0 ? (
                 <span className="ml-auto text-xs text-muted-foreground">{bot.unread}</span>
