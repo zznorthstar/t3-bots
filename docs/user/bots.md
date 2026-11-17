@@ -117,3 +117,8 @@ The setup saves private backups beside Hermes’ `.env` and `config.yaml`, prese
 backend and Discord credentials, and adds the HQ MCP connection. Then choose **New bot →
 Connect Hermes** (or the name of an already linked agent). A Docker-backed Hermes computer
 stays inside its existing sandbox. Connected-app credentials continue to use Bot HQ configuration.
+
+Named Hermes profiles can also be linked from **New bot** once their authenticated API
+is enabled. Each linked profile keeps its own soul, memory, messaging history and computer.
+Telegram imports are labeled Telegram. Disconnecting a profile removes its app conversation
+and uploads while preserving the existing Hermes profile and its gateway.

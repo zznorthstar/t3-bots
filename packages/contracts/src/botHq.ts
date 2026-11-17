@@ -23,7 +23,7 @@ export const BotHqBot = Schema.Struct({
   avatarShape: Schema.String,
   avatarVersion: Schema.optional(Schema.NullOr(Schema.String)),
   localVoice: Schema.optional(Schema.String),
-  engineKind: Schema.optional(Schema.NullOr(Schema.Literals(["primary", "managed"]))),
+  engineKind: Schema.optional(Schema.NullOr(Schema.Literals(["primary", "managed", "linked"]))),
   lastPreview: Schema.NullOr(Schema.String),
   unread: Schema.Number,
   generation: Schema.Number,
@@ -46,7 +46,7 @@ export const BotHqRow = Schema.Struct({
     streaming: Schema.optional(Schema.Boolean),
     from: Schema.optional(
       Schema.Struct({
-        kind: Schema.Literals(["bot", "routine", "voice", "discord"]),
+        kind: Schema.Literals(["bot", "routine", "voice", "discord", "telegram"]),
         id: Schema.String,
         name: Schema.String,
       }),
@@ -105,6 +105,17 @@ export const BotHqReadResult = Schema.Struct({
       provider: Schema.String,
       voices: Schema.Array(Schema.String),
     }),
+  ),
+  profiles: Schema.optional(
+    Schema.Array(
+      Schema.Struct({
+        profile: Schema.String,
+        name: Schema.String,
+        available: Schema.Boolean,
+        platform: Schema.String,
+        linkedBotId: Schema.NullOr(Schema.String),
+      }),
+    ),
   ),
   primary: Schema.optional(
     Schema.Struct({
@@ -178,7 +189,10 @@ export const BotHqMutation = Schema.Union([
   }),
   Schema.TaggedStruct("preferences", { displayName: Schema.String }),
   Schema.TaggedStruct("soul", { ...botId, ...BotHqSoul.fields }),
-  Schema.TaggedStruct("connect-primary", { name: Schema.String }),
+  Schema.TaggedStruct("connect-primary", {
+    name: Schema.String,
+    profile: Schema.optional(Schema.String),
+  }),
   Schema.TaggedStruct("voice-warm", {}),
   Schema.TaggedStruct("voice-setup", {}),
   Schema.TaggedStruct("voice-transcribe", { ...botId, data: Schema.String }),

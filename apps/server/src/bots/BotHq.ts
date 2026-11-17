@@ -110,7 +110,11 @@ const mutationRequest = (input: BotHqMutation) => {
           }
         : null;
     case "connect-primary":
-      return { method: "POST" as const, path: "/primary/connect", body: { name: input.name } };
+      return {
+        method: "POST" as const,
+        path: "/primary/connect",
+        body: { name: input.name, profile: input.profile },
+      };
     case "voice-warm":
       return { method: "POST" as const, path: "/voice/local/warm" };
     case "voice-setup":

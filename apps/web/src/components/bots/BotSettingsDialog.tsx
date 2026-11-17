@@ -221,10 +221,10 @@ export function BotSettingsDialog({
               botId={bot.id}
               onDirtyChange={setSoulDirty}
             />
-            {bot.engineKind === "primary" ? (
+            {bot.engineKind === "primary" || bot.engineKind === "linked" ? (
               <p className="text-xs text-muted-foreground">
-                Linked to your existing Hermes agent. Her Discord connection, memory and tools stay
-                with her.
+                Linked to your existing Hermes agent. Its messaging connection, memory and tools
+                stay with it.
               </p>
             ) : null}
             {profileSaved && soulDirty ? (

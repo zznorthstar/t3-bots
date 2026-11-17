@@ -622,7 +622,7 @@ export function BotConversation({
             <DialogHeader>
               <DialogTitle>Delete {bot?.name ?? "bot"}?</DialogTitle>
               <DialogDescription>
-                {bot?.engineKind === "primary"
+                {bot?.engineKind === "primary" || bot?.engineKind === "linked"
                   ? "This disconnects Hermes from T3 + Bots and removes this app’s conversation and uploaded files. Your Hermes agent and Discord connection stay available."
                   : "This removes this bot’s conversation, memory, files and managed computer."}
               </DialogDescription>

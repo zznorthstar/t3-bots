@@ -47,13 +47,17 @@ function NewBotDialog({
   const navigate = useNavigate();
   const { environments } = useEnvironments();
   const primary = useBotHqRead(environmentId, { resource: "primary" });
-  const connect = async () => {
+  const connect = async (profile?: { profile: string; name: string }) => {
     if (pending || !allowed) return;
     setPending(true);
     setError(null);
     const result = await mutate({
       environmentId,
-      input: { _tag: "connect-primary", name: primary.data?.primary?.name ?? "Hermes" },
+      input: {
+        _tag: "connect-primary",
+        name: profile?.name ?? primary.data?.primary?.name ?? "Hermes",
+        ...(profile ? { profile: profile.profile } : {}),
+      },
     });
     setPending(false);
     if (result._tag !== "Success") {
@@ -151,6 +155,24 @@ function NewBotDialog({
                 </Button>
               </div>
             ) : null}
+            {primary.data?.profiles
+              ?.filter((profile) => profile.available && !profile.linkedBotId)
+              .map((profile) => (
+                <div key={profile.profile} className="space-y-2 border-b pb-4">
+                  <p className="text-sm text-muted-foreground">
+                    Existing Hermes profile ·{" "}
+                    {profile.platform === "telegram" ? "Telegram" : "Discord"}
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={pending || !allowed}
+                    onClick={() => void connect(profile)}
+                  >
+                    Connect {profile.name}
+                  </Button>
+                </div>
+              ))}
             <div className="space-y-2">
               <Label htmlFor="bot-name">Name</Label>
               <Input
