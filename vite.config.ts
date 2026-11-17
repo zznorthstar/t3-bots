@@ -179,6 +179,7 @@ export default defineConfig({
   fmt: {
     ignorePatterns: [
       ".repos/**",
+      "runtime/**",
       "infra/task-cache/vendor/**",
       // Macroscope requires one glob per line; Markdown formatting corrupts it.
       ".macroscope/ignore.md",

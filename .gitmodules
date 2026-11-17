@@ -1,0 +1,4 @@
+[submodule "runtime/bot-hq"]
+	path = runtime/bot-hq
+	url = https://github.com/zznorthstar/bot-hq.git
+	branch = feat/local-hermes-desktops

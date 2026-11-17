@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="820" viewBox="0 0 1440 820" role="img" aria-labelledby="title desc">
+  <title id="title">One T3 workspace, with bots added</title>
+  <desc id="desc">An illustrated T3 workspace. Projects and bots share the sidebar, a fictional assistant conversation occupies the center, and a local bot computer appears in the right panel. This is an illustration, not a screenshot.</desc>
+  <rect width="1440" height="820" rx="18" fill="#151719"/>
+  <g font-family="Arial, Helvetica, sans-serif">
+    <rect x="1" y="1" width="1438" height="818" rx="17" fill="none" stroke="#3e4241"/>
+    <path d="M0 55h1440M244 55v718M882 55v718M0 773h1440" stroke="#353a37" fill="none"/>
+    <circle cx="26" cy="28" r="5" fill="#9b766e"/><circle cx="45" cy="28" r="5" fill="#b3a27e"/><circle cx="64" cy="28" r="5" fill="#819b86"/>
+    <text x="103" y="34" fill="#f1efe5" font-size="16" font-weight="700">T3 + Bots</text>
+    <text x="1213" y="33" fill="#969c95" font-size="12">ILLUSTRATIVE OVERVIEW</text>
+    <text x="23" y="100" fill="#9da69e" font-size="13">Search</text>
+    <text x="200" y="101" fill="#d7dfd6" font-size="23">+</text>
+    <text x="23" y="154" fill="#8f9990" font-size="11" letter-spacing="1.5">PROJECTS</text>
+    <text x="25" y="187" fill="#dfdfd5" font-size="14">website</text>
+    <text x="37" y="218" fill="#9fa89f" font-size="13">Review the latest changes</text>
+    <text x="25" y="270" fill="#8f9990" font-size="11" letter-spacing="1.5">BOTS</text>
+    <rect x="12" y="291" width="220" height="61" rx="7" fill="#28322c"/>
+    <circle cx="41" cy="321" r="16" fill="#aec6ae"/><text x="35" y="327" font-size="16" fill="#26362c" font-weight="700">N</text>
+    <text x="69" y="317" fill="#f2f1e5" font-size="14" font-weight="700">Nova</text>
+    <text x="69" y="336" fill="#b2bcae" font-size="12">Research assistant</text>
+    <circle cx="41" cy="384" r="16" fill="#cdb7a0"/><text x="35" y="390" font-size="16" fill="#443b2f" font-weight="700">A</text>
+    <text x="69" y="380" fill="#d8d9d1" font-size="14">Atlas</text>
+    <text x="69" y="399" fill="#919b91" font-size="12">Project coordinator</text>
+    <text x="26" y="452" fill="#b6c5b4" font-size="14">+ Create a bot</text>
+    <text x="24" y="746" fill="#879187" font-size="12">Settings</text>
+    <text x="275" y="97" fill="#f1f1e6" font-size="17" font-weight="700">Nova</text>
+    <text x="275" y="119" fill="#89988a" font-size="12">Your persistent Hermes assistant</text>
+    <line x1="265" y1="140" x2="862" y2="140" stroke="#303631"/>
+    <text x="494" y="184" fill="#78877b" font-size="11">SAMPLE CONVERSATION</text>
+    <rect x="423" y="213" width="419" height="69" rx="10" fill="#29312c"/>
+    <text x="443" y="241" fill="#e1e5da" font-size="14">Ask Atlas what is left before launch,</text>
+    <text x="443" y="263" fill="#e1e5da" font-size="14">then put a short checklist together.</text>
+    <circle cx="292" cy="332" r="16" fill="#aec6ae"/><text x="286" y="338" font-size="16" fill="#26362c" font-weight="700">N</text>
+    <text x="321" y="326" fill="#dee5d6" font-size="13" font-weight="700">Nova</text>
+    <text x="321" y="350" fill="#a3aea0" font-size="14">I will check with Atlas and review the plan.</text>
+    <rect x="321" y="371" width="491" height="43" rx="6" fill="#1d2420" stroke="#354137"/>
+    <circle cx="340" cy="392" r="4" fill="#a8bfaa"/>
+    <text x="355" y="397" fill="#b9c6b5" font-size="12">Asking Atlas about the launch checklist</text>
+    <circle cx="292" cy="465" r="16" fill="#cdb7a0"/><text x="286" y="471" font-size="16" fill="#443b2f" font-weight="700">A</text>
+    <text x="321" y="459" fill="#ded6c6" font-size="13" font-weight="700">Atlas</text>
+    <text x="365" y="459" fill="#7b8b7e" font-size="11">reply to Nova</text>
+    <text x="321" y="483" fill="#b6bdb0" font-size="14">Docs are ready. The final review is still open.</text>
+    <circle cx="292" cy="543" r="16" fill="#aec6ae"/><text x="286" y="549" font-size="16" fill="#26362c" font-weight="700">N</text>
+    <text x="321" y="537" fill="#dee5d6" font-size="13" font-weight="700">Nova</text>
+    <text x="321" y="561" fill="#b6bdb0" font-size="14">Here is the checklist, with that review marked.</text>
+    <rect x="321" y="579" width="245" height="45" rx="7" fill="#202922" stroke="#38473b"/>
+    <text x="339" y="607" fill="#cad7c3" font-size="13">launch-checklist.md</text>
+    <rect x="271" y="674" width="581" height="74" rx="11" fill="#202522" stroke="#3a433b"/>
+    <text x="289" y="702" fill="#7f8d80" font-size="13">Message Nova…</text>
+    <path d="M738 716v11m-4-11v4a4 4 0 0 0 8 0v-4m-4 11v5m-4 0h8" stroke="#aab5a5" fill="none" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M773 717c-4 3 4 13 9 10l2-3-4-2-2 2-4-4 1-2-1-2z" fill="none" stroke="#aab5a5" stroke-width="1.5"/>
+    <circle cx="823" cy="724" r="14" fill="#495c4b"/><path d="M823 731v-13m-5 5 5-5 5 5" stroke="#e3ebd8" fill="none" stroke-width="1.5"/>
+    <text x="907" y="96" fill="#88958a" font-size="13">Browser</text>
+    <text x="1004" y="96" fill="#88958a" font-size="13">Files</text>
+    <text x="1075" y="96" fill="#e4e9d9" font-size="13" font-weight="700">Bot</text>
+    <line x1="1068" y1="110" x2="1108" y2="110" stroke="#adc4ad" stroke-width="2"/>
+    <text x="907" y="145" fill="#d6dfcf" font-size="14">Nova's computer</text>
+    <rect x="904" y="166" width="514" height="338" rx="8" fill="#4b6455"/>
+    <rect x="926" y="191" width="469" height="258" rx="5" fill="#e7e9dc"/>
+    <path d="M926 222h469" stroke="#c4cbbc"/>
+    <circle cx="940" cy="207" r="3" fill="#ab8b81"/><circle cx="951" cy="207" r="3" fill="#b5a27c"/>
+    <rect x="972" y="199" width="354" height="15" rx="4" fill="#d4dacb"/>
+    <text x="953" y="261" fill="#364a3b" font-size="17" font-weight="700">Launch notes</text>
+    <text x="953" y="286" fill="#667861" font-size="12">A local browser on the bot's own desktop</text>
+    <rect x="953" y="309" width="413" height="40" rx="4" fill="#d7e0ce"/>
+    <rect x="969" y="324" width="220" height="6" rx="2" fill="#a8b69d"/>
+    <rect x="953" y="361" width="275" height="7" rx="2" fill="#c2cdb6"/>
+    <rect x="953" y="381" width="348" height="7" rx="2" fill="#c2cdb6"/>
+    <rect x="953" y="401" width="216" height="7" rx="2" fill="#c2cdb6"/>
+    <rect x="1074" y="465" width="178" height="23" rx="8" fill="#304a3b"/>
+    <rect x="1322" y="515" width="96" height="29" rx="5" fill="#28352b" stroke="#50654f"/>
+    <text x="1334" y="534" fill="#c7d8bf" font-size="11">Take control</text>
+    <circle cx="911" cy="531" r="3" fill="#a7c4a6"/><text x="922" y="535" fill="#8da38d" font-size="11">Local desktop · watch mode</text>
+    <line x1="904" y1="568" x2="1418" y2="568" stroke="#303a32"/>
+    <text x="906" y="603" fill="#cbd7c3" font-size="13">Tasks</text>
+    <text x="906" y="638" fill="#a2b39c" font-size="13">✓ Ask Atlas for the latest status</text>
+    <text x="906" y="672" fill="#a2b39c" font-size="13">✓ Prepare the launch checklist</text>
+    <text x="906" y="724" fill="#7d927c" font-size="12">Computer  /  Tasks  /  Routines  /  Memory</text>
+    <text x="24" y="802" fill="#8c998d" font-size="12">T3's workspace, with Bot HQ integrated into it.</text>
+    <text x="1090" y="802" fill="#788b7b" font-size="11">Fictional content · schematic illustration</text>
+  </g>
+</svg>

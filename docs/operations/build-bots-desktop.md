@@ -1,16 +1,16 @@
 # Build the bot desktop on Linux
 
 The bot desktop uses T3's normal desktop packager, then adds the Bot HQ runtime from
-the sibling checkout. It currently builds for Linux x64. Install T3's
+the pinned `runtime/bot-hq` submodule (or a sibling checkout). It currently builds for Linux x64. Install T3's
 [Linux build prerequisites](development.md#linux-appimage-prerequisites) and Rust first.
 
 Use Node 26 for T3's build and set `BOT_HQ_NODE` to a Node 22 executable. That executable
 is bundled with Bot HQ, whose native SQLite dependency is installed with the same ABI.
-The Bot HQ checkout must be on `feat/local-hermes-desktops`; set `BOT_HQ_ROOT` if it is
-not next to T3. No `.env`, credentials, bot homes or databases are copied into the package.
+Initialize the runtime with `git submodule update --init --recursive`. Set
+`BOT_HQ_ROOT` to its absolute path; the legacy default is a sibling `bot-hq` checkout. No `.env`, credentials, bot homes or databases are copied into the package.
 
 ```sh
-BOT_HQ_NODE=/path/to/node22 vp run dist:desktop:bots:linux
+BOT_HQ_ROOT="$PWD/runtime/bot-hq" BOT_HQ_NODE=/path/to/node22 vp run dist:desktop:bots:linux
 ```
 
 Artifacts appear under `release/bots`: an archive, SHA-256 checksum and `install.sh`.

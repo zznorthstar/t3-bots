@@ -20,7 +20,7 @@ can view bots but cannot create one, send messages or take control of its comput
 
 Deleting a managed bot removes its conversation, memory, files and computer. Disconnecting
 a linked Hermes agent removes its T3 + Bots conversation and uploads; its existing Hermes
-home, memory and Discord connection remain available.
+home, memory and existing messaging connections remain available.
 
 ## Install on Linux
 
@@ -53,12 +53,12 @@ For building the installer, see [Build the bot desktop](../operations/build-bots
 The integration uses the local Bot HQ runtime alongside T3's server, with one T3
 interface. It supports web and Linux desktop; the mobile app has no bot screens.
 
-Build the [local Hermes version of Bot HQ](https://github.com/zznorthstar/bot-hq/tree/feat/local-hermes-desktops)
-in a sibling `bot-hq` directory and follow its local desktop prerequisites. In this T3
-checkout, run:
+Initialize the pinned runtime with `git submodule update --init --recursive`, build
+`runtime/bot-hq` with Node 22, and follow its local desktop prerequisites. See the
+[public source setup](../../README.md#run-from-source). Then run:
 
 ```sh
-vp run dev:bots
+BOT_HQ_ROOT="$PWD/runtime/bot-hq" vp run dev:bots --no-seed
 ```
 
 The launcher starts both servers and stores their development data under this checkout's

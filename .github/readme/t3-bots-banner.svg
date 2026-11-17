@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="430" viewBox="0 0 1400 430" role="img" aria-labelledby="title desc">
+  <title id="title">T3 + Bots</title>
+  <desc id="desc">T3 Code, with a bot team on the side. An independent experiment built on T3, Bot HQ and Hermes.</desc>
+  <rect width="1400" height="430" rx="24" fill="#151719"/>
+  <g font-family="Arial, Helvetica, sans-serif">
+    <rect x="58" y="48" width="260" height="30" rx="15" fill="#2a2b29"/>
+    <circle cx="76" cy="63" r="4" fill="#9bc1aa"/>
+    <text x="90" y="68" fill="#deddd5" font-size="12" letter-spacing="1.5">AN INDEPENDENT EXPERIMENT</text>
+    <text x="55" y="207" fill="#f4f2e8" font-size="105" font-weight="700">T3</text>
+    <text x="230" y="207" fill="#a8bfae" font-size="105" font-weight="700">+</text>
+    <text x="326" y="207" fill="#f4f2e8" font-size="105" font-weight="700">Bots</text>
+    <text x="61" y="268" fill="#d3d0c7" font-size="29">T3 Code, with a bot team on the side.</text>
+    <line x1="61" x2="798" y1="330" y2="330" stroke="#393d3d"/>
+    <text x="61" y="374" fill="#a9ada7" font-size="14" letter-spacing="2">T3 CODE  /  BOT HQ  /  HERMES AGENT</text>
+    <rect x="931" y="91" width="369" height="246" rx="14" fill="#1c2020" stroke="#3b4440"/>
+    <rect x="951" y="111" width="92" height="206" rx="6" fill="#242a27"/>
+    <circle cx="974" cy="138" r="8" fill="#a8bfae"/>
+    <circle cx="974" cy="176" r="8" fill="#cbb79c"/>
+    <circle cx="974" cy="214" r="8" fill="#aab3cb"/>
+    <rect x="992" y="135" width="31" height="5" rx="2" fill="#6b756c"/>
+    <rect x="992" y="173" width="25" height="5" rx="2" fill="#6b756c"/>
+    <rect x="992" y="211" width="33" height="5" rx="2" fill="#6b756c"/>
+    <rect x="1062" y="126" width="218" height="112" rx="5" fill="#303b34"/>
+    <rect x="1079" y="145" width="184" height="75" rx="3" fill="#1c2421"/>
+    <path d="M1098 181h22m-13-11 13 11-13 11m27 0h25" fill="none" stroke="#a8bfae" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="1062" y="259" width="177" height="9" rx="4" fill="#626e64"/>
+    <rect x="1062" y="280" width="126" height="7" rx="3" fill="#3e4942"/>
+  </g>
+</svg>

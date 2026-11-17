@@ -1,5 +1,8 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Feature request
-    url: https://github.com/pingdotgg/t3code/discussions/categories/ideas
-    about: Suggest an improvement or new capability in Discussions.
+  - name: Private security report
+    url: https://github.com/zznorthstar/t3-bots/security/advisories/new
+    about: Report integration vulnerabilities privately. Do not publish credentials or exploit details.
+  - name: Official T3 Code
+    url: https://github.com/pingdotgg/t3code
+    about: Looking for regular T3? This repository is an independent bot experiment.

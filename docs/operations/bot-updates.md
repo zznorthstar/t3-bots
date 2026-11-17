@@ -17,7 +17,7 @@ the application preserves conversations, but does not preserve those UI features
    T3's current updater supports those formats; our per-user directory/archive
    installer is not an updater-compatible format.
 4. Publish the compatible artifact and updater manifests to the fork's GitHub
-   Releases. Build with `T3CODE_DESKTOP_UPDATE_REPOSITORY=zznorthstar/t3code` and
+   Releases. Build with `T3CODE_DESKTOP_UPDATE_REPOSITORY=zznorthstar/t3-bots` and
    enable updates only once that feed serves verified combined builds. The user
    can then use T3's usual check, download and restart controls.
 

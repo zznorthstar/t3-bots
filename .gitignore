@@ -51,3 +51,6 @@ node_modules/
 .pnpm-store/
 
 /packages/ssh/.ssh-launcher-test-*/
+
+# Pinned external runtime: its contents use its own tooling and style.
+/runtime/

@@ -1,108 +1,134 @@
 <p align="center">
-  <a href="https://t3.codes">
-    <img src="./assets/prod/t3-black-web-icon-192x192.png" width="80" height="80" alt="T3 Code logo" />
-  </a>
+  <img src=".github/readme/t3-bots-banner.svg" alt="T3 + Bots — T3 Code, with a bot team on the side." width="100%" />
 </p>
 
-<h1 align="center">T3 Code</h1>
-
-<p align="center">The open-source control plane for coding agents.</p>
+<p align="center"><strong>The T3 interface we like. A bot experiment we thought was cool.</strong></p>
 
 <p align="center">
-  <a href="https://t3.codes/download"><strong>Download</strong></a> ·
-  <a href="https://apps.apple.com/us/app/t3-code-remote-claude-more/id6787819824">iOS</a> ·
-  <a href="https://play.google.com/store/apps/details?id=com.t3tools.t3code">Android</a> ·
-  <a href="https://app.t3.codes">Web</a> ·
-  <a href="./docs/README.md">Docs</a> ·
-  <a href="https://discord.gg/jn4EGJjrvv">Discord</a>
+  <a href="https://github.com/zznorthstar/t3-bots/actions/workflows/ci.yml"><img alt="Repository checks" src="https://github.com/zznorthstar/t3-bots/actions/workflows/ci.yml/badge.svg" /></a>
+  <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-262626" /></a>
+  <img alt="Experimental" src="https://img.shields.io/badge/status-experimental-d89b55" />
+  <img alt="Bots target Linux" src="https://img.shields.io/badge/bots-Linux-89b4a0" />
 </p>
 
 <p align="center">
-  <a href="https://t3.codes">
-    <img src="./.github/readme/hero.webp" width="100%" alt="T3 Code on desktop with a finished Claude thread, next to the phone app asking to approve a command from Codex" />
-  </a>
+  <a href="#try-it">Try it</a> · <a href="docs/user/bots.md">Bot guide</a> · <a href="docs/operations/build-bots-desktop.md">Build the desktop</a> · <a href="https://github.com/zznorthstar/t3-bots/releases">Releases</a> · <a href="https://github.com/zznorthstar/t3-bots/issues">Feedback</a>
 </p>
 
-T3 Code runs the coding agents on your machine and gives them one fast interface. Start a thread at your desk, then approve the next step from your phone.
+**T3 + Bots is an independent, experimental fork of [T3 Code](https://github.com/pingdotgg/t3code) with [Bot HQ](https://github.com/nickvasilescu/bot-hq) integrated into its interface.** T3 supplies the app, coding workflow, UI and UX. Bot HQ supplies the bot team. [Hermes Agent](https://github.com/NousResearch/hermes-agent) runs the assistants and their computers.
 
-It works with Claude Code, Codex, Cursor, OpenCode, Grok Build, Antigravity, Kiro, Pi, Muse Code, fx, and any [ACP](./docs/user/providers-acp.md) agent. If an agent is set up on your computer, T3 Code can control it.
+Create a bot from T3's left sidebar. Chat with it in the main view. Open the **Bot** tab on the right to see its computer, tasks, routines and memory. Your coding projects and agent threads stay in the same application.
 
-## What you get
+## Why a separate repo?
 
-- **Your subscriptions.** T3 Code does not resell tokens. It drives the agents you are already signed in to.
-- **Every agent in one place.** Change models in the middle of a thread. Let Claude hand a task to Codex.
-- **Desktop, web, and phone.** One server, and every client shows the same threads. There are apps for iOS and Android.
-- **Remote ready.** Run agents on any machine. Connect over your local network, Tailscale, or [T3 Connect](./docs/user/remote-access.md).
-- **Git built in.** Each thread can work in its own worktree. Review the diff, then commit, push, and open a pull request with one button.
-- **Fast.** Performance is a feature here. We measure it, and we treat a dropped frame as a bug.
-- **Open.** MIT licensed. If you don't like something, fork it.
+We like T3 as it is. We don't believe a persistent bot team is necessarily valuable to most T3 users, or a good addition to the core product. We are not proposing this as a feature for upstream T3.
 
-## Install
+We just thought it was cool, wanted it for our own workflow, and decided to share it. That's the whole pitch.
 
-### Desktop app
+This is **T3 with an extra feature**, not a claim that we invented T3, Bot HQ, or a better version of either. It is not an official T3 release and is not affiliated with or endorsed by their maintainers. If you want regular T3, [get it from T3](https://t3.codes/download).
 
-[Download T3 Code](https://t3.codes/download) for macOS, Windows, or Linux. You can also use a package manager:
+## What the extra feature does
 
-| Platform       | Command                                                              |
-| -------------- | -------------------------------------------------------------------- |
-| macOS          | `brew install --cask t3-code`                                        |
-| Windows        | `winget install T3Tools.T3Code` or `scoop install extras/t3code`     |
-| Arch Linux     | `yay -S t3code-bin`                                                  |
-| Nix            | `nix profile add github:NixOS/nixpkgs/nixos-unstable#t3code`         |
-| Debian, Ubuntu | `.deb` from [Releases](https://github.com/pingdotgg/t3code/releases) |
+| Feature                           | What you get                                                                                                                                                                       |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Bots inside T3**                | Create persistent assistants beside projects and coding threads. Use T3's existing panels and navigation.                                                                          |
+| **A local computer per bot**      | Separate Hermes desktops and browser profiles on your Linux machine. Watch live, take control, then hand it back. No Orgo account needed for this backend.                         |
+| **A team that can talk**          | Bots can ask one another questions and participate in group conversations. Agent replies show the agent's identity.                                                                |
+| **Existing Hermes agents**        | Link the default agent or a named profile. Discord and Telegram can remain connected to the same agents. Linking does not split a shared profile or migrate history automatically. |
+| **Local voice and dictation**     | Calls with turn detection and interruption, using faster-whisper and Kokoro ONNX. Dictation fills your prompt without starting a call.                                             |
+| **Files and familiar identities** | Upload attachments and avatar images. Set your display name globally; the default is `user`.                                                                                       |
+| **A soul for each bot**           | Edit the bot's own `SOUL.md`, with conflict detection and backups. Existing linked souls are preserved unless you explicitly save an edit.                                         |
 
-### Command line
+<p align="center">
+  <img src=".github/readme/workspace-overview.svg" alt="Illustrated layout: T3 projects and bots on the left, a bot conversation in the center, and the bot's computer on the right." width="100%" />
+  <br />
+  <sub>Interface overview with fictional sample content; an illustration, not a product screenshot.</sub>
+</p>
 
-This installs the `t3` command. Run `t3` to start the server and open the web app.
+## Try it
 
-```bash
-curl -fsSL https://t3.codes/install.sh | sh
+The first public release is a **source preview**. The integrated desktop has been exercised on Ubuntu 26.04 x64; a portable, signed installer and an automatic update feed are not available yet. The existing packaging scripts can build a local installer.
+
+### Prerequisites
+
+- Linux with a Hermes installation that supports `hermes computer-use screen`.
+- Hermes signed in to a model provider, plus its desktop/input prerequisites. Start with the [local desktop setup](https://github.com/zznorthstar/bot-hq/blob/50e506a3344e49668218b8bd5725cbe8091242da/docs/LOCAL_SETUP.md).
+- Node 22 for Bot HQ, and [Vite+ (`vp`)](https://viteplus.dev/guide/) for T3. Vite+ uses the Node version pinned in T3's `package.json`.
+- Initial internet access for dependencies and optional speech models. Your model provider may still charge for agent inference; local desktops and local speech remove those separate hosted-service fees.
+
+### Run from source
+
+Clone the pinned runtime together with the app:
+
+```sh
+git clone --recurse-submodules https://github.com/zznorthstar/t3-bots.git
+cd t3-bots
 ```
 
-On Windows, in PowerShell:
+With **Node 22** active, build Bot HQ and keep its executable path:
 
-```powershell
-irm https://t3.codes/install.ps1 | iex
+```sh
+export BOT_HQ_NODE="$(command -v node)"
+cd runtime/bot-hq
+npm ci --allow-scripts=better-sqlite3,esbuild
+npm run build
+cd ../..
 ```
 
-To try it once without an install, run `npx t3@latest`.
+Install T3's dependencies through Vite+, then start the combined development app:
 
-### Phone
+```sh
+vp install
+BOT_HQ_ROOT="$PWD/runtime/bot-hq" vp run dev:bots --no-seed
+```
 
-Get the app from the [App Store](https://apps.apple.com/us/app/t3-code-remote-claude-more/id6787819824) or [Google Play](https://play.google.com/store/apps/details?id=com.t3tools.t3code). Then follow [remote access](./docs/user/remote-access.md) to connect it to your computer.
+Open the private pairing URL printed by the runner. Create a bot from the sidebar, then open its **Bot** panel. Development data stays in this checkout's `.t3` directory. Stop the development app when you are done; it is not the installed desktop.
 
-### Sign in to an agent
+If you cloned without submodules, run `git submodule update --init --recursive`. After pulling updates, run it again to select the pinned runtime revision. Do not use `--remote` unless you are intentionally testing a different runtime revision.
 
-T3 Code needs one agent that is installed and signed in. For example, install [Claude Code](https://claude.com/product/claude-code) and run `claude auth login`, or install [Codex CLI](https://developers.openai.com/codex/cli) and run `codex login`.
+### Build an installed desktop
 
-[Provider setup](./docs/user/install.md#providers) has the steps for each agent. [Install T3 Code](./docs/user/install.md) covers nightly builds, AppImage, WSL, and NixOS.
+With the native build prerequisites installed, keep `BOT_HQ_NODE` pointing to Node 22 and run:
 
-## "Wait, what are you selling me?"
+```sh
+BOT_HQ_ROOT="$PWD/runtime/bot-hq" vp run dist:desktop:bots:linux
+```
 
-Nothing. We built T3 Code because we wanted the best possible development experience with agents. We were inspired by existing solutions like the Codex desktop app, Conductor, Claude Desktop and Cursor Glass, but none met our bar.
+The archive, checksum and installer appear in `release/bots`. See the [desktop build guide](docs/operations/build-bots-desktop.md) for prerequisites, compatibility and installation. The installed app uses its own identity and `~/.t3-bots` data directory, alongside a stock T3 installation.
 
-We wanted something performant, remote-ready, and truly open. If we ever go the wrong direction, we want you to have everything you need to fork and build the tool that you want.
+## Before you make it your daily driver
 
-## Documentation
+- **Experimental, Linux first.** Bot screens are implemented in the web interface and Linux desktop. The inherited mobile clients do not have bot screens. A local build's native libraries can require the same or newer Linux distribution.
+- **Desktop separation is not a security sandbox.** Local desktops generally run as your Linux user. A linked Docker-backed Hermes profile can expose its container desktop, but this app does not create a VM or a new security boundary for every bot.
+- **Voice needs microphone access and model downloads.** Localhost works; remote microphone use requires HTTPS. Speech runs locally, while the Hermes conversation still uses its configured provider. The standalone Bot HQ interface retains its optional xAI voice path.
+- **Messaging setup stays in Hermes.** Linking an existing profile requires its authenticated API server. Splitting shared profiles and migrating Telegram history is an advanced, manual operation; back up first.
+- **Updates are manual today.** The installed fork's automatic updates are disabled. The [combined update-feed design](docs/operations/bot-updates.md) is a proposal, not an active merge-and-release service. Installing stock T3 binaries replaces the added bot UI.
+- **Keep the runtime local.** Bot HQ's development sign-in is for a trusted loopback service. Do not expose its raw port to the internet. T3 clients reach it through T3's authenticated connection.
 
-- [Install and first run](./docs/user/install.md)
-- [Remote access from a phone or another machine](./docs/user/remote-access.md)
-- [Permission modes](./docs/user/permission-modes.md)
-- [Source control](./docs/user/source-control.md)
-- [Connect outside agents over MCP](./docs/user/outside-agents.md)
-- [FAQ](./docs/user/faq.md)
+## How the pieces fit
 
-[All docs](./docs/README.md) has the full list.
+```mermaid
+flowchart LR
+    UI["T3 interface<br/>projects · coding threads · bots"] --> T3["T3 server<br/>authenticated bot adapter"]
+    T3 --> HQ["Bot HQ runtime<br/>chat · team tools · files · routines"]
+    HQ --> H["Hermes agents<br/>managed homes or linked profiles"]
+    H --> D["Local computers<br/>desktop · browser · human takeover"]
+    H --> M["Configured model provider"]
+    HQ --> V["Local speech<br/>faster-whisper + Kokoro ONNX"]
+    H -. "existing channels" .-> C["Discord / Telegram"]
+```
 
-## Contributing
+The runtime is a [pinned submodule](.gitmodules), so a checkout identifies both halves of the app. This is source integration, not a T3 plugin. We preserve T3's Git history and its original [README](README.upstream.md), [contribution guide](CONTRIBUTING.upstream.md) and [license](LICENSE).
 
-We have limited review capacity. Small, focused fixes are the most likely to be merged. Features need an approved discussion first.
+## Project links
 
-- Read [CONTRIBUTING.md](./CONTRIBUTING.md) before you report a bug or open a pull request.
-- Put feature requests in [Ideas](https://github.com/pingdotgg/t3code/discussions/categories/ideas).
-- Build from source with the [development runbook](./docs/operations/development.md#first-checkout). The [architecture overview](./docs/internals/overview.md) explains how it works.
-- Get help in [Discord](https://discord.gg/jn4EGJjrvv).
+- [Using bots](docs/user/bots.md) · [Local Hermes setup](https://github.com/zznorthstar/bot-hq/blob/50e506a3344e49668218b8bd5725cbe8091242da/docs/LOCAL_SETUP.md)
+- [Building the desktop](docs/operations/build-bots-desktop.md) · [Update strategy](docs/operations/bot-updates.md)
+- [Changelog](CHANGELOG.md) · [Contributing](CONTRIBUTING.md) · [Security](.github/SECURITY.md)
+- [Report a bug or share an idea](https://github.com/zznorthstar/t3-bots/issues/new/choose)
 
-## License
+## Credits and license
 
-[MIT](./LICENSE)
+Most of this repository is **[T3 Code by T3 Tools and its contributors](https://github.com/pingdotgg/t3code)**. The bot system comes from **[Bot HQ by Nick Vasilescu and its contributors](https://github.com/nickvasilescu/bot-hq)**, with this fork's local-desktop and integration changes. **[Hermes Agent by Nous Research and its contributors](https://github.com/NousResearch/hermes-agent)** is a separately installed dependency.
+
+The code is MIT-licensed; see [LICENSE](LICENSE), the [runtime license](https://github.com/zznorthstar/bot-hq/blob/50e506a3344e49668218b8bd5725cbe8091242da/LICENSE) and [attribution notes](NOTICE.md). Dependencies, speech models, artwork and product marks retain their respective licenses and owners. No affiliation or endorsement is implied.
