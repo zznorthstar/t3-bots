@@ -1,5 +1,10 @@
 import * as Schema from "effect/Schema";
 
+export const BotHqSoul = Schema.Struct({
+  text: Schema.String,
+  version: Schema.NullOr(Schema.String),
+});
+
 export const BotHqAttachment = Schema.Struct({
   id: Schema.String,
   name: Schema.String,
@@ -79,6 +84,8 @@ export const BotHqReadInput = Schema.Struct({
     "file",
     "voice",
     "primary",
+    "preferences",
+    "soul",
   ]),
   botId: Schema.optional(Schema.String),
   fileId: Schema.optional(Schema.String),
@@ -87,6 +94,8 @@ export const BotHqReadInput = Schema.Struct({
 export type BotHqReadInput = typeof BotHqReadInput.Type;
 
 export const BotHqReadResult = Schema.Struct({
+  preferences: Schema.optional(Schema.Struct({ displayName: Schema.String })),
+  soul: Schema.optional(BotHqSoul),
   avatar: Schema.optional(Schema.NullOr(Schema.String)),
   file: Schema.optional(Schema.Struct({ ...BotHqAttachment.fields, data: Schema.String })),
   voice: Schema.optional(
@@ -167,6 +176,8 @@ export const BotHqMutation = Schema.Union([
     instructions: Schema.String,
     localVoice: Schema.String,
   }),
+  Schema.TaggedStruct("preferences", { displayName: Schema.String }),
+  Schema.TaggedStruct("soul", { ...botId, ...BotHqSoul.fields }),
   Schema.TaggedStruct("connect-primary", { name: Schema.String }),
   Schema.TaggedStruct("voice-warm", {}),
   Schema.TaggedStruct("voice-setup", {}),
@@ -185,6 +196,8 @@ export const BotHqMutation = Schema.Union([
 ]);
 export type BotHqMutation = typeof BotHqMutation.Type;
 export const BotHqMutationResult = Schema.Struct({
+  preferences: Schema.optional(Schema.Struct({ displayName: Schema.String })),
+  soul: Schema.optional(BotHqSoul),
   attachment: Schema.optional(BotHqAttachment),
   text: Schema.optional(Schema.String),
   audio: Schema.optional(Schema.Struct({ data: Schema.String, mime: Schema.String })),

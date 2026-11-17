@@ -16,6 +16,7 @@ import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Textarea } from "../ui/textarea";
 import { Select, SelectTrigger, SelectValue, SelectPopup, SelectItem } from "../ui/select";
+import { BotSoulSettings } from "./BotSoulSettings";
 import { BotAvatar } from "./BotAvatar";
 import { avatarDataUrl } from "./botMedia";
 import { botCommandError } from "./NewBotDialog";
@@ -44,6 +45,8 @@ export function BotSettingsDialog({
   const [instructions, setInstructions] = useState(bot.instructions);
   const [voice, setVoice] = useState(bot.localVoice ?? "af_heart");
   const [pending, setPending] = useState(false);
+  const [soulDirty, setSoulDirty] = useState(false);
+  const [profileSaved, setProfileSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const photo = useRef<HTMLInputElement>(null);
   const allowed = useAtomValue(botHq.mutate.permissionAtom(environmentId));
@@ -89,8 +92,10 @@ export function BotSettingsDialog({
               },
             });
             setPending(false);
-            if (result._tag === "Success") onClose();
-            else setError(botCommandError(result));
+            if (result._tag === "Success") {
+              setProfileSaved(true);
+              if (!soulDirty) onClose();
+            } else setError(botCommandError(result));
           }}
         >
           <DialogHeader>
@@ -211,10 +216,20 @@ export function BotSettingsDialog({
                 </Button>
               ) : null}
             </div>
+            <BotSoulSettings
+              environmentId={environmentId}
+              botId={bot.id}
+              onDirtyChange={setSoulDirty}
+            />
             {bot.engineKind === "primary" ? (
               <p className="text-xs text-muted-foreground">
                 Linked to your existing Hermes agent. Her Discord connection, memory and tools stay
                 with her.
+              </p>
+            ) : null}
+            {profileSaved && soulDirty ? (
+              <p role="status" className="text-xs text-muted-foreground">
+                Profile saved. Save SOUL.md separately to keep your file edits.
               </p>
             ) : null}
             {error ? (
@@ -228,7 +243,7 @@ export function BotSettingsDialog({
               Cancel
             </Button>
             <Button type="submit" disabled={!allowed || pending || !name.trim()}>
-              {pending ? "Saving…" : "Save"}
+              {pending ? "Saving…" : "Save profile"}
             </Button>
           </DialogFooter>
         </form>

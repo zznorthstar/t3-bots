@@ -37,6 +37,7 @@ import {
 import type { RightPanelSurface } from "~/rightPanelStore";
 import { BotAvatar } from "./BotAvatar";
 import { BotSettingsDialog } from "./BotSettingsDialog";
+import { BotDictationButton } from "./BotDictationButton";
 import { BotVoiceCall } from "./BotVoiceCall";
 import { botMessageAuthor } from "./botMessageAuthor";
 import { downloadBotAttachment, fileBase64 } from "./botMedia";
@@ -213,6 +214,9 @@ export function BotConversation({
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [attachments, setAttachments] = useState<BotHqAttachment[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [callActive, setCallActive] = useState(false);
+  const [dictationBusy, setDictationBusy] = useState(false);
+  const composer = useRef<HTMLTextAreaElement>(null);
   const uploadInput = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const resync = useEffectEvent(transcript.refresh);
@@ -246,7 +250,8 @@ export function BotConversation({
     return result;
   };
   const send = async () => {
-    if ((!text.trim() && !attachments.length) || pending || uploading || !allowed) return;
+    if ((!text.trim() && !attachments.length) || pending || uploading || dictationBusy || !allowed)
+      return;
     const submitted = text;
     const result = await act({
       _tag: "send",
@@ -422,6 +427,7 @@ export function BotConversation({
                   </p>
                 ) : null}
                 <Textarea
+                  ref={composer}
                   aria-label={`Message ${bot.name}`}
                   value={text}
                   onChange={(event) => setText(event.currentTarget.value)}
@@ -506,7 +512,7 @@ export function BotConversation({
                         : "Read-only connection"}
                     </p>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex items-center gap-2">
                     {live?.isRunning ? (
                       <Button
                         type="button"
@@ -519,19 +525,43 @@ export function BotConversation({
                         <SquareIcon />
                       </Button>
                     ) : null}
+                    <BotDictationButton
+                      environmentId={environmentId}
+                      botId={botId}
+                      disabled={callActive || pending}
+                      onText={(dictated) => {
+                        setText((current) =>
+                          current.trim() ? `${current.trimEnd()} ${dictated}` : dictated,
+                        );
+                        composer.current?.focus();
+                      }}
+                      onError={setError}
+                      onBusyChange={setDictationBusy}
+                    />
+                    <BotVoiceCall
+                      environmentId={environmentId}
+                      bot={bot}
+                      rows={rows}
+                      disabled={dictationBusy}
+                      onActiveChange={setCallActive}
+                      onError={setError}
+                    />
                     <Button
                       type="submit"
                       size="icon-sm"
                       aria-label="Send message"
                       disabled={
-                        !allowed || (!text.trim() && !attachments.length) || pending || uploading
+                        !allowed ||
+                        (!text.trim() && !attachments.length) ||
+                        pending ||
+                        uploading ||
+                        dictationBusy
                       }
                     >
                       <ArrowUpIcon />
                     </Button>
                   </div>
                 </div>
-                <BotVoiceCall environmentId={environmentId} bot={bot} rows={rows} />
               </form>
             </>
           )}

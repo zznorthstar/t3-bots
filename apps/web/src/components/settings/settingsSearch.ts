@@ -691,6 +691,13 @@ export const SETTINGS_SEARCH_ITEMS = [
     searchTerms: ["notification sound alert completion input approval desktop"],
   },
   {
+    id: "bot-display-name",
+    title: "Your name for bots",
+    to: "/settings/general",
+    targetId: "bots-profile",
+    searchTerms: ["bot user name display preferred global profile identity"],
+  },
+  {
     id: "in-app-notifications",
     title: msg("In-app notifications"),
     to: "/settings/general",

@@ -16,7 +16,7 @@ const option = (name, fallback) => {
   const index = args.indexOf(name);
   return index < 0 ? fallback : args[index + 1];
 };
-const version = option("--version", "0.1.10-preview.bots.2");
+const version = option("--version", "0.1.10-preview.bots.3");
 if (!/^[\d.]+-[\w.]+$/.test(version)) throw new Error("Use a prerelease version for this fork.");
 const output = NodePath.resolve(option("--output-dir", NodePath.join(root, "release/bots")));
 const botRoot = NodePath.resolve(process.env.BOT_HQ_ROOT ?? NodePath.join(root, "../bot-hq"));

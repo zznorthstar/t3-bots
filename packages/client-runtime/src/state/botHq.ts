@@ -108,6 +108,16 @@ export function createBotHqAtoms<R, E>(runtime: Atom.AtomRuntime<EnvironmentRegi
               registry.refresh(read({ environmentId, input: { resource: "voice" } }));
             return;
           }
+          if (input._tag === "preferences") {
+            registry.refresh(read({ environmentId, input: { resource: "preferences" } }));
+            return;
+          }
+          if (input._tag === "soul") {
+            registry.refresh(
+              read({ environmentId, input: { resource: "soul", botId: input.botId } }),
+            );
+            return;
+          }
           if (input._tag === "upload") return;
           registry.refresh(read({ environmentId, input: { resource: "bots" } }));
           if ("botId" in input)

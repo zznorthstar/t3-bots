@@ -1,4 +1,5 @@
 import { useAtomValue } from "@effect/atom-react";
+import { BotUserNameSettings } from "../bots/BotUserNameSettings";
 import { NotificationSettings } from "./NotificationSettings";
 import { PRIVACY_POLICY_URL } from "../../legalLinks";
 import { CheckIcon } from "lucide-react";
@@ -803,6 +804,9 @@ export function GeneralSettingsPanel() {
 
   return (
     <SettingsPageContainer>
+      <SettingsSection id="bots-profile" title="Bots">
+        <BotUserNameSettings />
+      </SettingsSection>
       <SettingsSection id="notifications" title={gt("Notifications")}>
         <NotificationSettings />
         <SettingsRow

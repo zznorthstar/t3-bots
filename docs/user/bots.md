@@ -33,7 +33,9 @@ Keep the Linux package archive, its `.sha256` file and `install.sh` together. Ru
 Open **T3 Code + Bots** from your applications menu, or run `t3code-bots`. The installer
 includes T3, Bot HQ and Bot HQ's Node runtime. Both servers start automatically and listen
 on localhost. Updates use the same installer and retain your conversations and bot homes.
-The fork's automatic upstream updates are disabled.
+The fork's automatic upstream updates are disabled. See the proposed
+[compatible update feed](../operations/bot-updates.md) for retaining Bots through
+T3's normal update controls.
 
 Install Hermes and its local desktop prerequisites first, following
 [the local Hermes setup](https://github.com/zznorthstar/bot-hq/blob/feat/local-hermes-desktops/docs/LOCAL_SETUP.md).
@@ -79,10 +81,19 @@ Open the gear beside the bot name to edit its instructions, upload a PNG/JPEG/We
 or choose a voice. Avatars appear beside messages and in the sidebar. Messages from another
 bot carry that bot’s name and photo.
 
-Choose **Call** to talk using local Whisper recognition and Kokoro speech. Allow microphone
+Use the phone icon beside Send to talk using local Whisper recognition and Kokoro speech. Allow microphone
 access, then speak naturally; speaking over the bot stops its playback and interrupts its
-current turn. Mute or end the call using the call controls. Closing the conversation also
+current turn. Use the phone icon again to end the call. Closing the conversation also
 releases the microphone. Headphones help the microphone distinguish your voice from playback.
+Use the separate microphone icon to dictate a prompt. Stop dictation to insert the text
+into your draft; it is not sent automatically and no voice call starts.
+
+Set **Your name** under **Settings → General → Bots**. This is one global preference
+used by every bot, defaulting to `user`. Bot settings also include a **SOUL.md** editor.
+Saving that editor changes only the selected bot’s file, keeps a private previous version
+and checks for changes made elsewhere. Edited souls survive later profile edits. C4my’s
+existing soul is loaded unchanged and is written only if you explicitly save an edit.
+
 English speech models run on this PC; the Hermes language model keeps its existing provider.
 Speech has no API fees. On a fresh install, use **Install local voice models** in bot settings
 first (requires `uv`, internet access for the initial downloads and roughly 600 MB of storage).

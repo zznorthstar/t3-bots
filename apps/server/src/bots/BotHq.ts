@@ -93,6 +93,22 @@ const mutationRequest = (input: BotHqMutation) => {
             },
           }
         : null;
+    case "preferences":
+      return input.displayName.length <= 60
+        ? {
+            method: "POST" as const,
+            path: "/preferences",
+            body: { displayName: input.displayName },
+          }
+        : null;
+    case "soul":
+      return input.text.length <= 100_000
+        ? {
+            method: "POST" as const,
+            path: `${base}/soul`,
+            body: { text: input.text, version: input.version },
+          }
+        : null;
     case "connect-primary":
       return { method: "POST" as const, path: "/primary/connect", body: { name: input.name } };
     case "voice-warm":
@@ -176,7 +192,7 @@ const make = Effect.gen(function* () {
     if (cached !== null) return cached;
     const base = yield* origin;
     const request = HttpClientRequest.post(`${base}/api/auth/dev`).pipe(
-      HttpClientRequest.bodyJson({ email: "t3@localhost", name: "T3" }),
+      HttpClientRequest.bodyJson({ email: "t3@localhost", name: "user" }),
     );
     const response = yield* Effect.flatMap(request, client.execute).pipe(
       Effect.timeout("5 seconds"),
@@ -234,20 +250,25 @@ const make = Effect.gen(function* () {
         Effect.mapError((cause) => new BotHqError({ reason: "request_failed", cause })),
       );
   const read = Effect.fn("BotHq.read")(function* (input: BotHqReadInput) {
-    if (!["bots", "voice", "primary"].includes(input.resource) && !validId(input.botId))
+    if (
+      !["bots", "voice", "primary", "preferences"].includes(input.resource) &&
+      !validId(input.botId)
+    )
       return yield* new BotHqError({ reason: "invalid_request" });
     if (input.resource === "file" && !validId(input.fileId))
       return yield* new BotHqError({ reason: "invalid_request" });
     const path =
       input.resource === "bots"
         ? "/bots"
-        : input.resource === "voice"
-          ? "/voice/local/status"
-          : input.resource === "primary"
-            ? "/primary/status"
-            : input.resource === "file"
-              ? `/bots/${input.botId}/attachments/${input.fileId}`
-              : `/bots/${input.botId}/${input.resource === "memories" ? "settings" : input.resource}`;
+        : input.resource === "preferences"
+          ? "/preferences"
+          : input.resource === "voice"
+            ? "/voice/local/status"
+            : input.resource === "primary"
+              ? "/primary/status"
+              : input.resource === "file"
+                ? `/bots/${input.botId}/attachments/${input.fileId}`
+                : `/bots/${input.botId}/${input.resource === "memories" ? "settings" : input.resource}`;
     const response = yield* request("GET", path);
     return yield* response.json.pipe(
       Effect.mapError((cause) => new BotHqError({ reason: "request_failed", cause })),

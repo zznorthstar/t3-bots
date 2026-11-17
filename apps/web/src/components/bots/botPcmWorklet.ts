@@ -6,7 +6,18 @@ declare function registerProcessor(name: string, processor: typeof AudioWorkletP
 class BotPcmProcessor extends AudioWorkletProcessor {
   private buffer = new Float32Array(1024);
   private offset = 0;
+  private recording = true;
+  constructor() {
+    super();
+    this.port.onmessage = ({ data }) => {
+      if (data !== "stop") return;
+      this.recording = false;
+      if (this.offset) this.port.postMessage(this.buffer.slice(0, this.offset), []);
+      this.port.postMessage("stopped", []);
+    };
+  }
   process(inputs: Float32Array[][]) {
+    if (!this.recording) return true;
     const samples = inputs[0]?.[0];
     if (samples)
       for (const sample of samples) {
